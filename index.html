@@ -1,0 +1,1767 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="So Yeon Kim, Ph.D. candidate at KAIST. Nonadiabatic dynamics, electronic coherence near conical intersections, and Berry phase effects.">
+<meta name="color-scheme" content="dark">
+<title>So Yeon Kim</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,400..800;1,62..125,400..800&family=JetBrains+Mono:wght@400;500&family=Source+Serif+4:ital,opsz,wght@0,8..60,300..600;1,8..60,300..600&display=swap">
+<style>
+/* Layout: one fixed WebGL landscape fills the screen and scroll is simulation time. Narrative copy floats
+   lower-left over a soft veil (bottom on phones), reading panels flow on the left, HUD bottom-right,
+   chapter rail on the right edge. Palette taken from her slides: cyan/deep-blue S0, pearl S1,
+   orange wavepacket, red photon, on a night-blue ground. */
+:root{
+  color-scheme: dark;
+  --ink:#071020;          /* night-blue ground */
+  --ink-2:#0b1628;        /* reading panels */
+  --line:#1f314c;         /* hairlines */
+  --pearl:#e9eef5;        /* text, S1 sheet */
+  --mist:#93a7c0;         /* secondary text */
+  --faint:#62789a;        /* hairlines, dots, axis lines (not for text) */
+  --faint-text:#7d93b2;   /* tertiary text: >= 4.5:1 on ink, ink-2 and dusk */
+  --cyan:#7ad8f6;         /* S0 high energy */
+  --deep:#0b4a9c;         /* S0 wells */
+  --dusk:#172a4b;         /* horizon */
+  --glow:#ff9a4c;         /* the wavepacket */
+  --glow-core:#fff0dc;    /* hot centre of the packet */
+  --coh:#ffe1a6;          /* coherence shimmer */
+  --photon:#e8352d;       /* h-nu arrow */
+  --spin-up:#8f88ff;      /* spin up, blue-violet */
+  --spin-down:#ff9a4c;    /* spin down, orange */
+  --bubble:#fbfaf6;
+  --bubble-ink:#141b27;
+  --shadow:rgba(2,6,14,.45);
+  --veil:rgba(7,16,32,.86);
+  --hud-bg:rgba(7,16,32,.84);
+  --cyan-haze:rgba(122,216,246,.16);
+  --glow-haze:rgba(255,154,76,.24);
+  --focus:#ffc48f;
+
+  --font-display:"Archivo","Arial Narrow",Arial,sans-serif;
+  --font-body:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --font-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+
+  --s-1:clamp(.72rem,.69rem + .14vw,.8rem);
+  --s0:clamp(1rem,.95rem + .22vw,1.125rem);
+  --s1:clamp(1.15rem,1.04rem + .5vw,1.45rem);
+  --s2:clamp(1.95rem,1.3rem + 2.5vw,3.3rem);
+  --s3:clamp(3.1rem,1.6rem + 6.4vw,7rem);
+
+  --gx:clamp(16px,5.5vw,88px);
+  --hud-h:0px;
+}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth;overflow-x:clip;background:var(--ink);scroll-padding-top:84px}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--ink);color:var(--pearl);font-family:var(--font-body);font-size:var(--s0);
+  line-height:1.6;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;overflow-x:clip}
+a{color:inherit;text-decoration-color:var(--faint);text-underline-offset:.18em;text-decoration-thickness:1px}
+a:hover{text-decoration-color:var(--glow)}
+:focus-visible{outline:2px solid var(--focus);outline-offset:3px;border-radius:2px}
+::selection{background:var(--glow);color:var(--ink)}
+sub,sup{font-size:.68em;line-height:0}
+
+/* ---------- fixed layers ---------- */
+.backdrop{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(60% 38% at 30% 92%, var(--cyan-haze), transparent 70%),
+    radial-gradient(18% 14% at 58% 74%, var(--glow-haze), transparent 75%),
+    linear-gradient(180deg, var(--ink) 0%, var(--ink) 35%, var(--dusk) 100%)}
+#scene{position:fixed;inset:0;width:100%;height:100%;display:block;z-index:1;outline:none}
+.no-gl #scene{display:none}
+.scrim{position:fixed;inset:0;z-index:2;background:var(--ink);opacity:0;pointer-events:none}
+.veil{position:fixed;inset:0;z-index:2;pointer-events:none;
+  background:linear-gradient(90deg,var(--veil) 0%,var(--veil) 32%,transparent 64%),linear-gradient(0deg,var(--veil) 0%,transparent 34%)}
+.overlay{position:fixed;inset:0;z-index:3;pointer-events:none;overflow:hidden}
+.no-gl .overlay{display:none}
+
+/* ---------- masthead ---------- */
+.masthead{position:fixed;top:0;left:0;right:0;z-index:8;display:flex;flex-wrap:wrap;align-items:baseline;
+  justify-content:space-between;gap:6px 20px;padding:calc(env(safe-area-inset-top,0px) + 18px) var(--gx) 26px;
+  pointer-events:none;background:linear-gradient(180deg,var(--ink) 0%,var(--veil) 45%,transparent 100%)}
+.masthead > *{pointer-events:auto}
+.brand{font-family:var(--font-display);font-style:italic;font-weight:700;font-stretch:87.5%;font-size:1.06rem;
+  letter-spacing:-.005em;text-decoration:none;color:var(--pearl)}
+.quick{display:flex;flex-wrap:wrap;gap:4px 18px;font-family:var(--font-display);font-weight:500;font-size:.84rem;
+  letter-spacing:.02em}
+.quick a{text-decoration:none;color:var(--mist);padding:4px 0;border-bottom:1px solid transparent}
+.quick a:hover,.quick a[aria-current="true"]{color:var(--pearl);border-bottom-color:var(--glow)}
+
+/* ---------- chapter rail ---------- */
+.rail{position:fixed;right:clamp(10px,1.6vw,26px);top:50%;transform:translateY(-50%);z-index:7}
+.rail ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px;position:relative}
+.rail ol::before{content:"";position:absolute;right:6px;top:12px;bottom:12px;width:1px;background:var(--line)}
+.rail button{all:unset;cursor:pointer;position:relative;display:flex;align-items:center;justify-content:flex-end;
+  padding:5px 0 5px 12px;font-family:var(--font-mono);font-size:.7rem;letter-spacing:.06em;color:var(--mist)}
+/* the label sits outside the button's box, so only the dot column takes clicks and hover */
+.rail .lbl{position:absolute;right:calc(100% + 4px);top:50%;pointer-events:none;opacity:0;transform:translate(6px,-50%);
+  transition:opacity .2s,transform .2s;white-space:nowrap;background:var(--ink-2);padding:3px 8px;border:1px solid var(--line)}
+.rail .dot{width:7px;height:7px;border-radius:50%;border:1px solid var(--faint);background:var(--ink);margin-right:2px;
+  transition:background .2s,border-color .2s,transform .2s;position:relative}
+.rail button:hover .lbl,.rail button:focus-visible .lbl{opacity:1;transform:translate(0,-50%)}
+.rail button:focus-visible{outline:none}
+.rail button:focus-visible .dot{outline:2px solid var(--focus);outline-offset:3px}
+.rail button[aria-current="step"] .dot{background:var(--glow);border-color:var(--glow);transform:scale(1.3)}
+.rail button[aria-current="step"] .lbl{color:var(--pearl)}
+.rail li{display:flex;justify-content:flex-end}
+.rail li.gap{margin-top:14px}
+
+/* ---------- HUD ---------- */
+.hud{position:fixed;right:clamp(16px,2.2vw,34px);bottom:calc(env(safe-area-inset-bottom,0px) + 22px);z-index:6;
+  width:15rem;font-family:var(--font-mono);font-size:.74rem;line-height:1.55;color:var(--mist);
+  font-variant-numeric:tabular-nums;border-left:1px solid var(--line);padding:10px 14px;transition:opacity .3s;
+  background:var(--hud-bg);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border-radius:0 2px 2px 0}
+.hud p{margin:0;white-space:nowrap}
+.hud b{font-weight:500;color:var(--pearl)}
+.hud .hud-model{font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;color:var(--mist);margin-bottom:2px}
+.hud .hud-t{font-size:.98rem;color:var(--pearl);letter-spacing:-.01em}
+.hud .sw{display:inline-block;width:8px;height:2px;vertical-align:middle;margin-right:6px;background:var(--pearl)}
+.hud .sw-b{background:var(--cyan);margin-left:12px}
+.hud .sw-c{background:var(--glow)}
+.hud[data-model="berry"] .sw-a{background:var(--spin-up)}
+.hud[data-model="berry"] .sw-b{background:var(--spin-down)}
+.hud[data-model="berry"] .sw-c{background:var(--mist)}
+.hud canvas{display:block;width:100%;height:38px;margin:6px 0 4px}
+.hud .hud-about{font-size:.66rem;letter-spacing:.06em;color:var(--mist)}
+.hud .hud-about:hover{color:var(--pearl)}
+@media (max-width:1099px){html[data-reading] .hud{opacity:0;visibility:hidden}}
+
+/* ---------- story ---------- */
+#story{position:relative;z-index:4}
+.chapter{position:relative}
+.js .chapter{height:calc(var(--len,2) * 100vh);height:calc(var(--len,2) * 100svh)}
+.copy{max-width:35rem;padding-block:18vh 8vh;padding-inline:var(--gx)}
+.js .copy{position:fixed;left:var(--gx);bottom:max(10vh,calc(var(--hud-h) + 28px));width:min(34rem,44vw);
+  padding:0;opacity:0;will-change:opacity,transform}
+.js .copy p{text-shadow:0 0 10px var(--ink),0 0 2px var(--ink)}
+.js #top .copy{opacity:1}
+.eyebrow{font-family:var(--font-mono);font-size:var(--s-1);letter-spacing:.12em;text-transform:uppercase;
+  color:var(--mist);margin:0 0 .9rem;display:flex;align-items:center;gap:.7em}
+.eyebrow::before{content:"";width:22px;height:1px;background:currentColor;opacity:.6}
+.copy h1,.copy h2,.panel h2{font-family:var(--font-display);font-style:italic;font-weight:700;font-stretch:87.5%;
+  letter-spacing:-.012em;line-height:1.02;margin:0 0 1.1rem;text-wrap:balance;color:var(--pearl)}
+.copy h2,.panel h2{font-size:var(--s2)}
+.copy h1.name{font-size:var(--s3);font-weight:800;letter-spacing:-.025em;line-height:.92;margin-bottom:1.1rem}
+.copy p{margin:0 0 .9rem;max-width:34rem;text-wrap:pretty}
+.role{font-family:var(--font-display);font-size:var(--s1);font-weight:600;font-stretch:87.5%;line-height:1.25;
+  color:var(--pearl)}
+.role span{display:block;font-weight:400;font-stretch:100%;font-size:.78em;color:var(--mist);margin-top:.15rem}
+.tagline{font-style:italic;font-size:var(--s1);color:var(--pearl);line-height:1.35}
+.hint{font-family:var(--font-mono);font-size:var(--s-1);letter-spacing:.1em;text-transform:uppercase;color:var(--mist);
+  display:flex;align-items:center;gap:.8em;margin-top:2rem!important;white-space:nowrap}
+.hint::after{content:"";width:1px;height:28px;background:linear-gradient(var(--mist),transparent);
+  animation:drip 2.4s ease-in-out infinite}
+@keyframes drip{0%,100%{transform:translateY(-3px);opacity:.4}50%{transform:translateY(4px);opacity:1}}
+.onscreen{font-family:var(--font-mono);font-size:.74rem;line-height:1.6;color:var(--mist);letter-spacing:.01em;
+  border-top:1px solid var(--line);padding-top:.7rem;margin-top:1.2rem!important}
+.onscreen strong{font-weight:500;color:var(--pearl)}
+.hv{color:var(--photon);font-weight:600;text-transform:none;font-family:var(--font-body);font-style:italic;font-size:1.25em;letter-spacing:0}
+.k-glow{color:var(--glow)}
+.k-up{color:var(--spin-up)}
+.k-cyan{color:var(--cyan)}
+
+/* ---------- reading panels ---------- */
+.reading{position:relative;padding-block:22vh 6vh;padding-inline:var(--gx)}
+.reading + .reading{padding-top:4vh}
+#publications{padding-top:34vh}
+.panel{max-width:46rem;width:min(46rem,calc(100vw - var(--gx) - 72px));background:var(--ink-2);border-top:1px solid var(--line);
+  padding:clamp(22px,3.6vw,52px);box-sizing:border-box}
+.panel h2{margin-bottom:1.6rem}
+.panel h2:focus{outline:none}
+.panel h3{font-family:var(--font-mono);font-weight:500;font-size:var(--s-1);letter-spacing:.12em;text-transform:uppercase;
+  color:var(--mist);margin:2.4rem 0 .9rem;padding-bottom:.55rem;border-bottom:1px solid var(--line)}
+.panel p{margin:0 0 1rem;max-width:40rem}
+.lede{font-size:var(--s1);line-height:1.5}
+.rows{list-style:none;margin:0;padding:0;display:grid;gap:.85rem}
+.rows li{display:grid;grid-template-columns:9.5rem minmax(0,1fr);gap:.2rem 1.4rem;align-items:baseline}
+.rows .when{font-family:var(--font-mono);font-size:.76rem;color:var(--mist);font-variant-numeric:tabular-nums;line-height:1.5}
+.rows .what{min-width:0}
+.rows .sub{display:block;color:var(--mist);font-size:.92em;line-height:1.45}
+.pubs li{grid-template-columns:4.2rem minmax(0,1fr)}
+.pubs .when{font-size:.9rem;color:var(--pearl)}
+.cite{line-height:1.55}
+.cite .authors{display:block;color:var(--mist);font-size:.92em}
+.cite .authors b{color:var(--pearl);font-weight:600}
+.cite .title{display:block;font-weight:500;margin:.15rem 0}
+.cite .venue i{font-style:italic}
+.tag{font-family:var(--font-mono);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--glow);
+  margin-left:.4em;white-space:nowrap}
+.motto{font-family:var(--font-mono);font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--mist)}
+.group{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.1em;color:var(--faint-text);margin:1.2rem 0 .5rem!important}
+.panel h4{font-family:var(--font-mono);font-weight:500;font-size:var(--s-1);letter-spacing:.12em;text-transform:uppercase;
+  color:var(--mist);margin:2rem 0 0}
+.email{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;margin:1.8rem 0 1.4rem}
+.email code{font-family:var(--font-mono);font-size:clamp(1rem,.9rem + .6vw,1.3rem);color:var(--pearl);user-select:all;
+  overflow-wrap:anywhere}
+.btn{font:500 .78rem/1 var(--font-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink);background:var(--glow);
+  border:0;padding:9px 14px;cursor:pointer;border-radius:2px}
+.btn:hover{background:var(--pearl)}
+.status{font-family:var(--font-mono);font-size:.74rem;color:var(--mist);min-width:6em}
+.links{list-style:none;margin:0;padding:0;display:grid;gap:.55rem}
+.links li{display:grid;grid-template-columns:9.5rem minmax(0,1fr);gap:.1rem 1.4rem;align-items:baseline}
+.links .when{font-family:var(--font-mono);font-size:.74rem;color:var(--mist)}
+.links a{overflow-wrap:anywhere}
+details.about{margin-top:2.4rem;border-top:1px solid var(--line);padding-top:1rem}
+details.about summary{cursor:pointer;font-family:var(--font-mono);font-size:var(--s-1);letter-spacing:.12em;
+  text-transform:uppercase;color:var(--mist);list-style:none;display:flex;align-items:center;gap:.7em}
+details.about summary::-webkit-details-marker{display:none}
+details.about summary::before{content:"+";font-size:1rem;width:1em;color:var(--glow)}
+details.about[open] > summary::before{content:"\2212"}
+details.about .body{font-size:.95rem;color:var(--pearl);margin-top:1rem}
+details.about dl{display:grid;grid-template-columns:8rem minmax(0,1fr);gap:.5rem 1.2rem;margin:0}
+details.about dt{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.06em;color:var(--mist);padding-top:.2rem}
+details.about dd{margin:0;min-width:0}
+details.about details.about{margin-top:1.4rem;padding-top:.8rem}
+details.about details.about summary{font-size:.7rem}
+details.about details.about dl{margin-top:.9rem}
+.mono{font-family:var(--font-mono);font-size:.86em}
+.foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px 24px;margin-top:3rem;padding-top:1rem;
+  border-top:1px solid var(--line);font-family:var(--font-mono);font-size:.72rem;color:var(--faint-text)}
+.foot button{all:unset;cursor:pointer;color:var(--mist)}
+.foot button:hover{color:var(--pearl)}
+.foot button:focus-visible{outline:2px solid var(--focus);outline-offset:3px}
+#contact{padding-bottom:16vh;min-height:80vh}
+
+/* ---------- scene overlay: bubbles and labels ---------- */
+.bubble{position:absolute;left:0;top:0;opacity:0;transition:opacity .28s ease;will-change:transform}
+.bubble .b{position:absolute;bottom:14px;left:-12px;white-space:nowrap;background:var(--bubble);color:var(--bubble-ink);
+  font:600 .82rem/1.2 var(--font-display);letter-spacing:.005em;padding:7px 12px 8px;border-radius:14px;
+  box-shadow:0 8px 22px var(--shadow);animation:bob 3.2s ease-in-out infinite}
+.bubble .b::after{content:"";position:absolute;left:6px;bottom:-7px;border-style:solid;border-width:8px 7px 0 7px;
+  border-color:var(--bubble) transparent transparent transparent;transform:translateX(var(--tail,0px))}
+.bubble.l .b{left:auto;right:-12px}
+.bubble.l .b::after{left:auto;right:6px}
+.bubble .spin{font-weight:800;margin-right:.35em}
+.bubble .spin.up{color:var(--spin-up)}
+.bubble .spin.down{color:var(--spin-down)}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+.lbl3d{position:absolute;left:0;top:0;opacity:0;transition:opacity .3s;font-family:var(--font-mono);font-size:.7rem;
+  letter-spacing:.04em;color:var(--mist);white-space:nowrap;will-change:transform}
+.lbl3d > span{display:block;transform:translate(-50%,-50%)}
+.lbl3d.surf{font-family:var(--font-display);font-style:italic;font-weight:700;font-size:1rem;color:var(--pearl)}
+.lbl3d.hv > span{font-family:var(--font-body);font-style:italic;font-weight:600;font-size:1.25rem;color:var(--photon);
+  transform:translate(-120%,-50%)}
+.lbl3d.tick{font-size:.62rem;color:var(--faint-text)}
+.lbl3d.tick > span{transform:translate(-130%,-50%)}
+.lbl3d.mark > span{transform:translate(-50%,-160%);color:var(--pearl)}
+.lbl3d.below > span{transform:translate(-50%,80%)}
+.lbl3d > span{text-shadow:0 0 6px var(--ink),0 0 2px var(--ink)}
+
+@media (prefers-reduced-motion: reduce){
+  .bubble .b,.hint::after{animation:none}
+  .bubble,.lbl3d,.rail .lbl,.hud{transition:none}
+}
+
+/* ---------- tablets / phones ---------- */
+@media (max-width:899px){
+  .js .copy{width:min(34rem,58vw)}
+}
+@media (max-width:719px){
+  :root{--hud-h:58px}
+  .veil{background:linear-gradient(0deg,var(--ink) 0%,var(--veil) 45%,transparent 70%)}
+  /* the "On screen" notes describe the canvas for screen readers; on phones hide them visually only */
+  .onscreen{position:absolute!important;width:1px;height:1px;margin:0!important;padding:0;border:0;overflow:hidden;
+    clip-path:inset(50%);white-space:nowrap}
+  .eyebrow{letter-spacing:.08em;font-size:.68rem;margin-bottom:.6rem}
+  .js .copy{left:16px;right:16px;width:auto;bottom:calc(env(safe-area-inset-bottom,0px) + var(--hud-h) + 18px)}
+  .copy p{font-size:.98rem;line-height:1.55;margin-bottom:.7rem}
+  .copy h2{margin-bottom:.8rem}
+  .hint{margin-top:1.2rem!important}
+  .rail{display:none}
+  .masthead{padding:calc(env(safe-area-inset-top,0px) + 12px) 16px 10px;gap:4px 14px}
+  html[data-reading] .masthead{background:var(--ink)}
+  .lbl3d.hv > span{transform:translate(-190%,-50%)}
+  .quick{gap:2px 14px;font-size:.8rem}
+  .hud{left:0;right:0;bottom:0;width:auto;border-left:0;border-top:1px solid var(--line);background:var(--ink);border-radius:0;
+    padding:8px 16px calc(env(safe-area-inset-bottom,0px) + 8px);display:grid;grid-template-columns:minmax(0,1fr) 92px;
+    column-gap:12px;align-items:center;font-size:.68rem;line-height:1.45}
+  .hud > *{grid-column:1}
+  .hud .hud-model,.hud .hud-about{display:none}
+  .hud .hud-t{font-size:.82rem}
+  .hud canvas{grid-column:2;grid-row:1 / span 3;height:34px;margin:0}
+  .hud .sw-b{margin-left:8px}
+  .reading{padding-inline:16px}
+  .panel{width:auto;padding:22px 18px}
+  .rows li,.links li{grid-template-columns:minmax(0,1fr);gap:.1rem}
+  .pubs li{grid-template-columns:minmax(0,1fr)}
+  details.about dl{grid-template-columns:minmax(0,1fr);gap:.2rem}
+  details.about dd{margin-bottom:.6rem}
+}
+@media (max-width:419px){
+  .hint-more{display:none}
+}
+@media (max-height:520px) and (orientation:landscape){
+  .js .copy{position:static;width:auto;max-width:40rem;opacity:1!important;transform:none!important;
+    padding-block:16vh 8vh;padding-inline:var(--gx)}
+  .veil{background:linear-gradient(90deg,var(--veil) 0%,var(--veil) 45%,transparent 75%)}
+  .hud{display:none}
+}
+/* set by script when a chapter's fixed text block is too tall for the window: the "On screen" notes are then
+   kept for screen readers only */
+.js.tight-copy .copy .onscreen{position:absolute!important;width:1px;height:1px;margin:0!important;padding:0;border:0;
+  overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+/* set by script when a chapter's fixed text block would not fit between the masthead and the bottom
+   (short windows, enlarged text): the copy then flows with the page and can always be scrolled to */
+.js.flow-copy .copy{position:static;width:auto;max-width:40rem;opacity:1!important;transform:none!important;
+  padding-block:14vh 8vh;padding-inline:var(--gx)}
+.js.flow-copy .copy > *{text-shadow:0 0 14px var(--ink),0 1px 2px var(--ink)}
+.js.flow-copy .veil{background:linear-gradient(90deg,var(--veil) 0%,var(--veil) 45%,transparent 80%)}
+@media (max-width:719px){
+  .js.flow-copy .copy{padding-inline:16px}
+  .js.flow-copy .veil{background:var(--veil)}
+}
+</style>
+</head>
+<body>
+
+<script>document.documentElement.classList.add('js');document.documentElement.setAttribute('lang','en');</script>
+
+<canvas id="scene" aria-hidden="true" tabindex="-1"></canvas>
+<div class="backdrop" aria-hidden="true"></div>
+<div class="scrim" id="scrim" aria-hidden="true"></div>
+<div class="veil" id="veil" aria-hidden="true"></div>
+<div class="overlay" id="overlay" aria-hidden="true"></div>
+
+<header class="masthead" lang="en">
+  <a class="brand" href="#top" data-go="0">So Yeon Kim</a>
+  <nav class="quick" aria-label="Quick links">
+    <a href="#descend" data-go="2">Research</a>
+    <a href="#publications" data-go="6">Publications</a>
+    <a href="#cv" data-go="7">CV</a>
+    <a href="#contact" data-go="8">Contact</a>
+  </nav>
+</header>
+
+<nav class="rail" aria-label="Chapters" lang="en">
+  <ol>
+    <li><button type="button" data-go="0"><span class="lbl">Ground state</span><span class="dot"></span></button></li>
+    <li><button type="button" data-go="1"><span class="lbl">Excitation</span><span class="dot"></span></button></li>
+    <li><button type="button" data-go="2"><span class="lbl">Down S&#8321;</span><span class="dot"></span></button></li>
+    <li><button type="button" data-go="3"><span class="lbl">Conical intersection</span><span class="dot"></span></button></li>
+    <li><button type="button" data-go="4"><span class="lbl">Branching</span><span class="dot"></span></button></li>
+    <li><button type="button" data-go="5"><span class="lbl">Spin &amp; Berry force</span><span class="dot"></span></button></li>
+    <li class="gap"><button type="button" data-go="6"><span class="lbl">Publications</span><span class="dot"></span></button></li>
+    <li><button type="button" data-go="7"><span class="lbl">CV</span><span class="dot"></span></button></li>
+    <li><button type="button" data-go="8"><span class="lbl">Contact</span><span class="dot"></span></button></li>
+  </ol>
+</nav>
+
+<aside class="hud" id="hud" data-model="ci" aria-label="Simulation readout" lang="en" hidden>
+  <p class="hud-model" id="hud-model">Model 1 &middot; conical intersection</p>
+  <p class="hud-t" id="hud-t">t &lt; 0</p>
+  <p><span class="sw sw-a"></span><span id="hud-k1">P(S&#8321;)</span> <b id="hud-v1">0.00</b><span class="sw sw-b"></span><span id="hud-k2">P(S&#8320;)</span> <b id="hud-v2">1.00</b></p>
+  <p><span class="sw sw-c"></span><span id="hud-k3">|&rho;&#8321;&#8320;|</span> <b id="hud-v3">0.00</b></p>
+  <canvas id="hud-spark" aria-hidden="true"></canvas>
+  <a class="hud-about" href="#about-sim" id="hud-about">About this simulation</a>
+</aside>
+
+<main id="story" lang="en">
+  <section class="chapter" id="top" data-ch="0" style="--len:1.3" aria-labelledby="h-top">
+    <div class="copy">
+      <p class="eyebrow">t &lt; 0 &middot; resting in S&#8320;</p>
+      <h1 class="name" id="h-top" tabindex="-1">So Yeon Kim</h1>
+      <p class="role">Hamiltonian designer <span>Ph.D. candidate, Department of Chemistry, KAIST</span></p>
+      <p class="tagline">Physics is theoretical, but the fun is real!</p>
+      <p class="hint">Scroll to excite<span class="hint-more">&nbsp;the wavepacket</span></p>
+    </div>
+  </section>
+
+  <section class="chapter" id="excite" data-ch="1" style="--len:1.9" aria-labelledby="h-excite">
+    <div class="copy">
+      <p class="eyebrow"><span class="hv">h&nu;</span>&nbsp;&middot; vertical excitation</p>
+      <h2 id="h-excite" tabindex="-1">Like an excited electron</h2>
+      <p>When I was a freshman, &ldquo;like an excited electron,&rdquo; I decided to become a scientist who actively enjoys physics and chemistry. That goal naturally sparked my interest in physical chemistry.</p>
+      <p>Now I am a Hamiltonian designer: I develop quantum chemical electronic structure methods to describe excited electrons.</p>
+      <p class="onscreen"><strong>On screen</strong> &middot; a photon lifts the resting packet straight up from S&#8320; to S&#8321; at the Franck&ndash;Condon point. The nuclei have not moved yet.</p>
+    </div>
+  </section>
+
+  <section class="chapter" id="descend" data-ch="2" style="--len:2" aria-labelledby="h-descend">
+    <div class="copy">
+      <p class="eyebrow">S&#8321; &middot; downhill</p>
+      <h2 id="h-descend" tabindex="-1">Nonadiabatic dynamics</h2>
+      <p>My central interest is nonadiabatic dynamics: what happens when electrons and nuclei can no longer be treated as independent.</p>
+      <p>I am fascinated by electronic coherence: how quantum superposition among electronic states influences the outcome of a molecular process, and whether it is more than a transient artifact near surface crossings.</p>
+      <p class="onscreen"><strong>On screen</strong> &middot; the packet slides down the excited-state surface toward the point where the two surfaces touch.</p>
+    </div>
+  </section>
+
+  <section class="chapter" id="ci" data-ch="3" style="--len:2.3" aria-labelledby="h-ci">
+    <div class="copy">
+      <p class="eyebrow">S&#8321; / S&#8320; &middot; conical intersection</p>
+      <h2 id="h-ci" tabindex="-1">Where two surfaces meet</h2>
+      <p>Near a conical intersection many electronic configurations become nearly degenerate, and molecules can pass through radical-pair states with strong diradical character. Coherence effects are most pronounced here.</p>
+      <p>Describing these regions takes a multireference treatment that is also efficient enough to give energies, nonadiabatic couplings and gradients at every step of thousands of trajectories. I am interested in electronic structure methods that meet both demands, including selected configuration interaction (SCI), a compact way to approximate multireference wavefunctions.</p>
+      <p class="onscreen"><strong>On screen</strong> &middot; the <span class="k-glow">orange ring</span> roughly outlines the radical-pair region (drawn, not computed). The pale shimmer shows where S&#8321; and S&#8320; density overlap, |&psi;&#8321;||&psi;&#8320;|, while population flows from S&#8321; to S&#8320;.</p>
+    </div>
+  </section>
+
+  <section class="chapter" id="branch" data-ch="4" style="--len:2.4" aria-labelledby="h-branch">
+    <div class="copy">
+      <p class="eyebrow">S&#8320; &middot; branching</p>
+      <h2 id="h-branch" tabindex="-1">Which reaction pathway?</h2>
+      <p>I want to understand how the topology of a crossing shapes the coherence that passes through it, and how that coherence in turn decides which reaction pathway a molecule ultimately takes.</p>
+      <p class="onscreen"><strong>On screen</strong> &middot; on S&#8320; the hot packet runs into a ridge on the far wall of the product well (a two-mode stand-in for energy flowing into other modes) and splits into two lobes on either side of Q<sub>coupling</sub> = 0. Part heads back toward the reactant well, part reaches the product well.</p>
+    </div>
+  </section>
+
+  <section class="chapter" id="spin" data-ch="5" style="--len:2.8" aria-labelledby="h-spin">
+    <div class="copy">
+      <p class="eyebrow">Berry force &middot; spin</p>
+      <h2 id="h-spin" tabindex="-1">Next: spin and the Berry force</h2>
+      <p>Going further, I am drawn to Berry phase effects in dynamics: how the geometric phase accumulated near degeneracies gives rise to a real force on nuclei, and how this force subtly redirects molecular trajectories in ways population-based pictures miss.</p>
+      <p>These threads meet in chirality-induced spin selectivity (CISS): what does Berry force do to spin-state dynamics, does coherence survive it, and is coherence the key to the surprisingly large spin polarizations?</p>
+      <p class="onscreen"><strong>On screen</strong> &middot; a second model. <span class="k-up">Spin &uarr;</span> follows H, <span class="k-glow">spin &darr;</span> its complex conjugate H* (W &rarr; &minus;W). Same start, opposite deflection.</p>
+    </div>
+  </section>
+
+  <section class="reading" id="publications" data-ch="6" aria-labelledby="h-pub">
+    <div class="panel">
+      <p class="eyebrow">Papers</p>
+      <h2 id="h-pub" tabindex="-1">Publications</h2>
+      <ol class="rows pubs">
+        <li><span class="when">2024</span>
+          <div class="what cite">
+            <span class="authors">Yoon, H. J.; Park, S.; <b>Kim, S. Y.</b>; Hong, D.; Park, J. W.*; Lim M.*</span>
+            <span class="title">&ldquo;Dynamics of NO Release and Linkage Isomer Formation from S-Nitroso-Mercaptoethanol in Aqueous Solutions: Insights from Femtosecond Infrared Spectroscopy&rdquo;</span>
+            <span class="venue"><i>J. Phys. Chem. Lett.</i> 15, 8829 (2024).</span> <span class="tag">(Co-first author)</span>
+          </div></li>
+        <li><span class="when">2023</span>
+          <div class="what cite">
+            <span class="authors"><b>Kim, S. Y.</b>; Park, J. W.*</span>
+            <span class="title">&ldquo;Approximate Excited State Geometry Optimization with the State-Averaged Adaptive Sampling Configuration Interaction Algorithm with Large Active Spaces&rdquo;</span>
+            <span class="venue"><i>J. Chem. Theory Comput.</i> 19, 7260 (2023).</span>
+          </div></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="reading" id="cv" data-ch="7" aria-labelledby="h-cv">
+    <div class="panel">
+      <p class="eyebrow">So Yeon</p>
+      <h2 id="h-cv" tabindex="-1">CV</h2>
+      <p class="motto">Create &middot; Explore &middot; Expand &middot; Conquer</p>
+      <p class="lede">I am a Ph.D. candidate in the Department of Chemistry at KAIST, advised by Prof. Young Min Rhee. My research focuses on developing theoretical methodologies for excited-state photodynamics.</p>
+      <p>I have investigated nonadiabatic dynamics near conical intersections, with particular emphasis on the role of electronic coherence in excited-state processes. Currently, I am extending this to intersystem crossing, studying the interplay between Berry phase effect and quantum coherence in spin-dependent nonadiabatic dynamics, with the long-term goal of understanding how molecular motion and spin&ndash;orbit coupling influence CISS. Before that, I completed my master&rsquo;s degree under Prof. Jae Woo Park at Chungbuk National University, where I developed multireference electronic structure methods for excited states of large molecular systems, an interest that continues to inform my current research.</p>
+      <p class="sub mono">Quantum chemistry method development &middot; Nonadiabatic dynamics &middot; Spectroscopic calculations</p>
+
+      <h3>Education</h3>
+      <ul class="rows">
+        <li><span class="when">Mar. 2024 &ndash; Feb. 2028 (expected)</span>
+          <span class="what">Ph.D. in Chemistry, Korea Advanced Institute of Science and Technology (KAIST) <span class="sub">Advisor: Prof. Young Min Rhee</span></span></li>
+        <li><span class="when">Mar. 2022 &ndash; Feb. 2024</span>
+          <span class="what">M.S. in Chemistry, Chungbuk National University (CBNU) <span class="sub">Advisor: Prof. Jae Woo Park</span></span></li>
+        <li><span class="when">Mar. 2017 &ndash; Feb. 2022</span>
+          <span class="what">B.S. in Physics (double major: Chemistry), Chungbuk National University (CBNU) <span class="sub">Summa Cum Laude</span></span></li>
+      </ul>
+
+      <h3>Awards &amp; Honors</h3>
+      <ul class="rows">
+        <li><span class="when">Jul. 2024</span> <span class="what">Best Poster Award <span class="sub">Center for Quantum Dynamics Summer Workshop</span></span></li>
+        <li><span class="when">Feb. 2024 &ndash; present</span> <span class="what">Government Support Admission Scholarship <span class="sub">KAIST</span></span></li>
+        <li><span class="when">May 2023</span> <span class="what">Soulbrain Nanum Foundation Scholarship</span></li>
+        <li><span class="when">Feb. 2022</span> <span class="what">Summa Cum Laude <span class="sub">CBNU</span></span></li>
+        <li><span class="when">2019</span> <span class="what">Academic Excellence Scholarship (1st &amp; 2nd semester) <span class="sub">CBNU</span></span></li>
+        <li><span class="when">Mar. 2017</span> <span class="what">Academic Excellence Admission Scholarship <span class="sub">CBNU</span></span></li>
+      </ul>
+
+      <h3>Teaching experience</h3>
+      <p class="group">KAIST</p>
+      <ul class="rows">
+        <li><span class="when">Fall 2026</span> <span class="what">Chemistry Major Lab I</span></li>
+        <li><span class="when">Spring 2026</span> <span class="what">Computational Chemistry</span></li>
+        <li><span class="when">Fall 2024</span> <span class="what">Physical Chemistry II: Statistical Thermodynamics</span></li>
+        <li><span class="when">Spring 2024</span> <span class="what">General Chemistry Laboratory I</span></li>
+      </ul>
+      <p class="group">CBNU</p>
+      <ul class="rows">
+        <li><span class="when">2022 &ndash; 2023</span> <span class="what">General Chemistry Laboratory <span class="sub">4 semesters</span></span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="reading" id="contact" data-ch="8" aria-labelledby="h-contact">
+    <div class="panel">
+      <p class="eyebrow">Next goal</p>
+      <h2 id="h-contact" tabindex="-1">Like a conical intersection</h2>
+      <p class="lede">Like a conical intersection connecting two states, I aspire to become a researcher who connects spectroscopy and computational chemistry, supporting experimenters to deeply understand various chemical phenomena.</p>
+      <p>As always, I will commit to continuous growth for new goals and science. Please give me your cheer up! Thank you!</p>
+
+      <h3>Get in touch</h3>
+      <div class="email">
+        <code id="email">sonnykim@kaist.ac.kr</code>
+        <button class="btn" type="button" id="copy-email">Copy email</button>
+        <span class="status" id="copy-status" role="status" aria-live="polite"></span>
+      </div>
+
+      <ul class="links">
+        <li><span class="when">ORCID</span> <a href="https://orcid.org/0009-0002-0677-9820" target="_blank" rel="noopener">0009-0002-0677-9820</a></li>
+        <li><span class="when">Group</span> <a href="http://singlet.kaist.ac.kr/" target="_blank" rel="noopener">Computational Photodynamics Research Lab (Prof. Young Min Rhee), KAIST</a></li>
+        <li><span class="when">M.S. group</span> <a href="https://sites.google.com/view/cbnuqbc/home" target="_blank" rel="noopener">Prof. Jae Woo Park&rsquo;s group, CBNU</a></li>
+        <li><span class="when">Instagram</span> <a href="https://instagram.com/last_day_0n_earth" target="_blank" rel="noopener">@last_day_0n_earth</a></li>
+        <li><span class="when">Old site</span> <span><a href="https://sites.google.com/view/sonny-kim/travels" target="_blank" rel="noopener">Travels</a> &middot; <a href="https://sites.google.com/view/sonny-kim/latex-for-cbnu" target="_blank" rel="noopener">LaTeX for CBNU</a></span></li>
+      </ul>
+
+      <details class="about" id="about-sim">
+        <summary>About this simulation</summary>
+        <div class="body">
+          <p>The glowing packet is a real solution of the time-dependent Schr&ouml;dinger equation: a nuclear wavepacket propagated on a grid (split-operator method) over two coupled model potential energy surfaces. Its passage through the conical intersection, the population transfer and the coherence in the readout are all computed from that solution. The surfaces come from a deliberately simple two-mode model Hamiltonian, not from calculations on a real molecule. The spin chapter uses a textbook complex-Hamiltonian model in which the Berry force pushes the two spin partners apart.</p>
+          <dl id="about-dl">
+            <dt>Model 1</dt>
+            <dd>Two coupled diabatic states in two dimensionless normal coordinates, Q<sub>tuning</sub> and Q<sub>coupling</sub>, with a linear coupling and a conical intersection just beside the Franck&ndash;Condon line. The surfaces drawn are its adiabatic states, S&#8320; and S&#8321;.</dd>
+            <dt hidden>In Model 1</dt>
+            <dd hidden id="about-m1"></dd>
+            <dt>Coherence</dt>
+            <dd>|&rho;&#8321;&#8320;| in the readout is the electronic coherence between S&#8321; and S&#8320; in the adiabatic basis, |&int;&psi;&#8321;*&psi;&#8320;|. The pale shimmer is the local magnitude |&psi;&#8321;(r)||&psi;&#8320;(r)|, large wherever both states have density at the same nuclear positions; it can stay bright after |&rho;&#8321;&#8320;| has dephased to almost zero.</dd>
+            <dt>Model 2</dt>
+            <dd>The complex two-state Hamiltonian of Miao, Bellonzi and Subotnik (J. Chem. Phys. 2019), with a gentle downhill ramp common to both states, run with W and &minus;W. &ldquo;Spin &uarr;/&darr;&rdquo; label H and its complex conjugate H*, a stand-in for a pair of spin partners (the model has no real triplet sublevels). With a real coupling (W = 0) the packets go straight.</dd>
+            <dt hidden>Spin pair</dt>
+            <dd hidden id="about-m2"></dd>
+            <dt>Illustrative</dt>
+            <dd>The models themselves: two modes and no bath. Three design choices keep the story legible. The conical intersection sits slightly off the Franck&ndash;Condon line; with it on the line, the S&#8321;&ndash;S&#8320; coherence in the readout would cancel to zero by symmetry. A ridge on the far wall of the product well stands in for energy flowing into other modes, and the two-lobe split on S&#8320; comes from that ridge, not from the intersection or the coherence. The radical-pair ring is drawn around the intersection, roughly where the S&#8320;&ndash;S&#8321; gap is about 1&nbsp;eV or less; the model itself has no electronic configurations. Also illustrative: the vertical scale; the height of the glowing hills, which show |&psi;| so faint tails stay visible and are rescaled frame by frame late in the run; the flicker of the shimmer; the resting packet and photon before t = 0; and the speech bubbles. Nothing removes the <span id="about-exc">4.5</span>&nbsp;eV of excess energy: the final populations describe a hot, isolated two-mode system, and the times follow from the chosen parameters. Neither is a product yield or a prediction for a real molecule.</dd>
+          </dl>
+          <details class="about" id="about-tech">
+            <summary>Technical details</summary>
+            <dl id="about-tech-dl">
+              <dt>Method</dt>
+              <dd>Exact quantum dynamics: grid-based split-operator propagation with Strang splitting (exact 2&times;2 potential step, FFT kinetic step), starting from the ground vibrational Gaussian placed on S&#8321; (vertical excitation). Densities are projected onto the adiabatic states point by point. Norm and energy are conserved to better than 10<sup>&minus;5</sup>.</dd>
+              <dt>Computed</dt>
+              <dd>Every frame after t = 0, and the populations, |&rho;&#8321;&#8320;|, &langle;y&rangle; and centroids in the readout.</dd>
+            </dl>
+          </details>
+        </div>
+      </details>
+
+      <div class="foot">
+        <span>So Yeon Kim &middot; Department of Chemistry, KAIST</span>
+        <button type="button" data-go="0" aria-label="Back to top">Back to t &lt; 0 &uarr;</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+/* Core: scroll position -> story position P (chapter index + fraction), copy fades, rail, links.
+   Runs without WebGL and without data. */
+var Story = (function () {
+  'use strict';
+  var root = document.documentElement;
+  var mqReduce = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
+  var mqFlow = window.matchMedia ? window.matchMedia('(max-height: 520px) and (orientation: landscape)') : { matches: false };
+  var secs = Array.prototype.slice.call(document.querySelectorAll('#story > [data-ch]'));
+  var N = secs.length;
+  var copies = secs.map(function (s) { return s.classList.contains('chapter') ? s.querySelector('.copy') : null; });
+  var lastNarr = 0; copies.forEach(function (c, i) { if (c) lastNarr = i; });
+  var railBtns = Array.prototype.slice.call(document.querySelectorAll('.rail button'));
+  var quick = Array.prototype.slice.call(document.querySelectorAll('.quick a'));
+  var scrim = document.getElementById('scrim'), veil = document.getElementById('veil');
+  var tops = [], bounds = [], vh = 1, listeners = [], pending = false, lastC = -1;
+
+  function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
+  function ramp(v, a, b) { return clamp((v - a) / (b - a), 0, 1); }
+  function smooth(v, a, b) { var x = ramp(v, a, b); return x * x * (3 - 2 * x); }
+  function sy() { return window.pageYOffset || document.documentElement.scrollTop || 0; }
+
+  /* fixed narrative copy must fit between the masthead links and its bottom offset; if any block does not
+     (short window, enlarged text), switch every block to normal flow so nothing is cut off or unreachable */
+  function checkFit() {
+    root.classList.remove('flow-copy', 'tight-copy');
+    if (mqFlow.matches) return;
+    var top = 0;
+    Array.prototype.forEach.call(document.querySelectorAll('.masthead .brand, .masthead .quick'), function (el) {
+      top = Math.max(top, el.getBoundingClientRect().bottom);
+    });
+    var h = window.innerHeight || 1;
+    function bad() {
+      return copies.some(function (c) {
+        if (!c) return false;
+        var cs = getComputedStyle(c);
+        return cs.position === 'fixed' && h - (parseFloat(cs.bottom) || 0) - c.offsetHeight < top + 6;
+      });
+    }
+    if (!bad()) return;
+    root.classList.add('tight-copy');            /* first try: the "On screen" notes become screen-reader only */
+    if (!bad()) return;
+    root.classList.remove('tight-copy');
+    root.classList.add('flow-copy');             /* still too tall: let the text flow with the page */
+  }
+  function measure() {
+    checkFit();
+    vh = window.innerHeight || 1;
+    var y = sy();
+    tops = secs.map(function (s) { return s.getBoundingClientRect().top + y; });
+    var maxScroll = Math.max(1, document.documentElement.scrollHeight - vh);
+    bounds = tops.map(function (t, i) { return i === 0 ? 0 : t - 0.5 * vh; });
+    for (var i = 1; i < N; i++) bounds[i] = Math.max(bounds[i], bounds[i - 1] + 1);
+    bounds.push(Math.max(maxScroll, bounds[N - 1] + 1));
+  }
+  function posAt(y) {
+    var c = 0;
+    while (c < N - 1 && y >= bounds[c + 1]) c++;
+    return clamp(c + (y - bounds[c]) / Math.max(1, bounds[c + 1] - bounds[c]), 0, N);
+  }
+  function P() { return posAt(sy()); }
+
+  function update() {
+    pending = false;
+    var y = sy(), p = posAt(y), reduce = mqReduce.matches, flow = mqFlow.matches || root.classList.contains('flow-copy');
+    for (var c = 0; c < N; c++) {
+      var el = copies[c]; if (!el) continue;
+      if (flow) { el.style.opacity = ''; el.style.transform = ''; el.style.pointerEvents = ''; continue; }
+      var aIn = c === 0 ? 1 : ramp(y, bounds[c] - 0.03 * vh, bounds[c] + 0.15 * vh);
+      var outEnd = c === lastNarr ? tops[c + 1] - 0.92 * vh : bounds[c + 1] - 0.04 * vh;
+      var aOut = 1 - ramp(y, outEnd - 0.2 * vh, outEnd);
+      var a = aIn * aOut;
+      el.style.opacity = a.toFixed(3);
+      el.style.transform = reduce ? 'none' : 'translateY(' + ((1 - aIn) * 16 - (1 - aOut) * 16).toFixed(1) + 'px)';
+      el.style.pointerEvents = a > 0.5 ? 'auto' : 'none';
+    }
+    var cur = Math.min(N - 1, Math.floor(p));
+    if (cur !== lastC) {
+      lastC = cur;
+      railBtns.forEach(function (b, i) { if (i === cur) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
+      quick.forEach(function (a) {
+        var g = +a.getAttribute('data-go');
+        var on = g === 2 ? (cur >= 2 && cur <= 5) : g === cur;
+        if (on) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current');
+      });
+      root.setAttribute('data-ch', String(cur));
+    }
+    if (p >= 5.85) root.setAttribute('data-reading', ''); else root.removeAttribute('data-reading');
+    /* a short dip to dark while the camera flies between the two landscapes, then the reading-section dim */
+    var cut = smooth(p, 4.9, 5.0) * (1 - smooth(p, 5.16, 5.3));
+    scrim.style.opacity = Math.max(0.92 * cut, 0.58 * smooth(p, 5.75, 6.15) - 0.22 * smooth(p, 7.6, 8.4)).toFixed(3);
+    veil.style.opacity = (1 - smooth(p, 5.7, 6.0)).toFixed(3);
+    for (var i = 0; i < listeners.length; i++) listeners[i](p);
+  }
+  function schedule() { if (!pending) { pending = true; window.requestAnimationFrame(update); } }
+
+  function go(c) {
+    measure();
+    c = clamp(c | 0, 0, N - 1);
+    var reading = secs[c].classList.contains('reading');
+    var panel = reading ? secs[c].querySelector('.panel') : null;
+    var y = c === 0 ? 0 : panel ? panel.getBoundingClientRect().top + sy() - 72 : bounds[c] + 0.2 * vh;
+    if (reading && c === N - 1) y = Math.min(y, document.documentElement.scrollHeight - vh);
+    window.scrollTo({ top: Math.max(0, y), behavior: mqReduce.matches ? 'auto' : 'smooth' });
+    var h = secs[c].querySelector('h1, h2');
+    if (h) { try { h.focus({ preventScroll: true }); } catch (e) { /* older browsers */ } }
+  }
+
+  document.addEventListener('click', function (ev) {
+    var t = ev.target.closest ? ev.target.closest('[data-go]') : null;
+    if (!t) return;
+    ev.preventDefault();
+    go(+t.getAttribute('data-go'));
+  });
+
+  var copyBtn = document.getElementById('copy-email'), status = document.getElementById('copy-status');
+  if (copyBtn) copyBtn.addEventListener('click', function () {
+    var text = document.getElementById('email').textContent.trim();
+    function select() {
+      var r = document.createRange(); r.selectNodeContents(document.getElementById('email'));
+      var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+      status.textContent = 'Selected: press Ctrl+C or ⌘C';
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () { status.textContent = 'Copied'; }, select);
+    } else select();
+  });
+
+  var about = document.getElementById('hud-about');
+  if (about) about.addEventListener('click', function (ev) {
+    ev.preventDefault();
+    var d = document.getElementById('about-sim');
+    d.open = true;
+    d.scrollIntoView({ behavior: mqReduce.matches ? 'auto' : 'smooth', block: 'start' });
+    d.querySelector('summary').focus({ preventScroll: true });
+  });
+
+  measure(); update();
+  window.addEventListener('scroll', schedule, { passive: true });
+  window.addEventListener('resize', function () { measure(); schedule(); });
+  window.addEventListener('load', function () { measure(); schedule(); });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { measure(); schedule(); });
+
+  return {
+    P: P, go: go, measure: measure, ramp: ramp, smooth: smooth, clamp: clamp,
+    yAt: function (p) { var c = clamp(Math.floor(p), 0, N - 1); return bounds[c] + (p - c) * (bounds[c + 1] - bounds[c]); },
+    reduce: function () { return mqReduce.matches; },
+    on: function (fn) { listeners.push(fn); }
+  };
+})();
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+<script src="assets/wavepacket-data.js"></script>
+<script>
+/* Scene: reads everything from window.WP_DATA (SPEC section 4). Scroll position P drives simulation time
+   and a Catmull-Rom camera path through one world holding two landscapes (CI model, Berry model). */
+(function () {
+  'use strict';
+  var D = window.WP_DATA;
+  var root = document.documentElement;
+  var clamp = Story.clamp, ramp = Story.ramp, smooth = Story.smooth;
+  var $ = function (id) { return document.getElementById(id); };
+  var css = getComputedStyle(root);
+  var tok = function (n) { return css.getPropertyValue(n).trim(); };
+  function lerp(a, b, t) { return a + (b - a) * t; }
+
+  function staticBackdrop(reason) {
+    root.classList.add('no-gl');
+    if (reason) console.info('[wavepacket] static backdrop:', reason);
+  }
+  if (!D || !D.ci || !D.ci.series || !D.ci.grid) { staticBackdrop('window.WP_DATA missing'); return; }
+
+  /* ---------------- decoding & interpolation ---------------- */
+  function b64u8(s) {
+    var bin = atob(s), n = bin.length, a = new Uint8Array(n);
+    for (var i = 0; i < n; i++) a[i] = bin.charCodeAt(i);
+    return a;
+  }
+  function b64f32(s) { var u = b64u8(s); return new Float32Array(u.buffer, 0, u.length >> 2); }
+  function locate(ts, t) {
+    var n = ts.length;
+    if (n < 2 || t <= ts[0]) return [0, 0];
+    if (t >= ts[n - 1]) return [n - 1, 0];
+    var lo = 0, hi = n - 1;
+    while (hi - lo > 1) { var m = (lo + hi) >> 1; if (ts[m] <= t) lo = m; else hi = m; }
+    return [lo, (t - ts[lo]) / ((ts[hi] - ts[lo]) || 1)];
+  }
+  function at1(ts, arr, t) {
+    if (!arr || !arr.length) return 0;
+    var kf = locate(ts, t), k = kf[0], k1 = Math.min(k + 1, arr.length - 1);
+    return lerp(+arr[k], +arr[k1], kf[1]);
+  }
+  function at2(ts, arr, t) {
+    if (!arr || !arr.length) return [0, 0];
+    var kf = locate(ts, t), k = kf[0], k1 = Math.min(k + 1, arr.length - 1);
+    return [lerp(arr[k][0], arr[k1][0], kf[1]), lerp(arr[k][1], arr[k1][1], kf[1])];
+  }
+  function firstAbove(arr, thr) { for (var i = 0; i < arr.length; i++) if (arr[i] > thr) return i; return -1; }
+
+  /* ---------------- timeline derived from the data ---------------- */
+  var CI = D.ci, SE = CI.series, BE = (D.berry && D.berry.series && D.berry.grid) ? D.berry : null;
+  var ts = SE.tFs, t0 = ts[0], tEnd = ts[ts.length - 1], span = (tEnd - t0) || 1;
+  var iCI = firstAbove(SE.popLower, 0.1);
+  var tCI = iCI >= 0 ? ts[iCI] : t0 + 0.1 * span;                  /* CI arrival: P(S0) first > 0.1 */
+  var iA = firstAbove(SE.popLower, 0.03);
+  var tA = clamp(iA >= 0 ? ts[iA] : tCI, t0 + 0.5 * (tCI - t0), tCI); /* exchange begins */
+  var ipk = -1, pk = -1;
+  for (var i = 0; i < ts.length; i++) if (ts[i] >= tA && ts[i] <= t0 + 0.6 * span && SE.coh[i] > pk) { pk = SE.coh[i]; ipk = i; }
+  var tPk = ipk >= 0 ? ts[ipk] : tCI;                               /* coherence peak (packet at the CI) */
+  var tB = tCI + 0.03 * span;
+  if (ipk >= 0) for (i = ipk; i < ts.length; i++) if (SE.coh[i] < 0.1 * pk) { tB = ts[i]; break; }
+  tB = clamp(tB, Math.max(tCI, tA) + 0.012 * span, t0 + 0.5 * span); /* coherence has faded */
+  /* chapter 4 time knots (scroll fraction -> t): spend most of the scroll on the first excursion of the hot S0 packet
+     (out to the far wall of the product well, the two-lobe split, the S1 remnant landing on the reactant side),
+     then sweep the late back-and-forth quickly to the end of the run */
+  var b4 = [[0, tB], [0.12, tB + 0.06 * (tEnd - tB)], [0.5, tB + 0.16 * (tEnd - tB)], [0.74, tB + 0.37 * (tEnd - tB)], [1, tEnd]];
+  var bts = BE ? BE.series.tFs : [0, 1], bt0 = bts[0], btEnd = bts[bts.length - 1];
+  var TL = { t0: t0, tA: tA, tCI: tCI, tPk: tPk, tB: tB, tEnd: tEnd, bt0: bt0, btEnd: btEnd, ch4: b4 };
+  /* monotone cubic (Fritsch-Carlson) through the knots, so scroll speed changes smoothly */
+  var b4m = (function (K) {
+    var n = K.length, d = [], m = [];
+    for (var k = 0; k < n - 1; k++) d.push((K[k + 1][1] - K[k][1]) / (K[k + 1][0] - K[k][0]));
+    m.push(d[0]); for (k = 1; k < n - 1; k++) m.push(d[k - 1] * d[k] <= 0 ? 0 : 2 / (1 / d[k - 1] + 1 / d[k])); m.push(d[n - 2]);
+    return m;
+  })(b4);
+  function ch4Time(u) {
+    var k = 0; while (k < b4.length - 2 && u > b4[k + 1][0]) k++;
+    var a = b4[k], b = b4[k + 1], h = b[0] - a[0], s = clamp((u - a[0]) / h, 0, 1), s2 = s * s, s3 = s2 * s;
+    return (2 * s3 - 3 * s2 + 1) * a[1] + (s3 - 2 * s2 + s) * h * b4m[k] + (-2 * s3 + 3 * s2) * b[1] + (s3 - s2) * h * b4m[k + 1];
+  }
+
+  function stateAt(P) {
+    var c = Math.min(8, Math.max(0, Math.floor(P))), u = P - c;
+    var uu = clamp((u - 0.06) / 0.86, 0, 1);
+    var s = { P: P, c: c, u: u, e: 0, arrow: 0, phase: 'ground', t: t0, tb: bt0, model: 'ci' };
+    if (P >= 1 && P < 2) {
+      var er = clamp((u - 0.1) / 0.62, 0, 1);
+      s.arrow = smooth(er, 0, 0.55); s.e = smooth(er, 0.38, 1);
+      s.phase = s.e >= 1 ? 'run' : 'excite';
+    } else if (P >= 2) {
+      s.e = 1; s.arrow = 1; s.phase = 'run';
+      /* chapter 4 follows the knots above, so the branching right after the CI gets more scroll than the late sloshing */
+      s.t = P < 3 ? lerp(t0, tA, uu) : P < 4 ? lerp(tA, tB, uu) : P < 5 ? ch4Time(uu) : tEnd;
+    }
+    if (BE && P >= 5) s.tb = lerp(bt0, btEnd, P < 6 ? clamp((u - 0.3) / 0.6, 0, 1) : 1);
+    s.model = (BE && P >= 4.97 && P < 5.9) ? 'berry' : 'ci';
+    return s;
+  }
+
+  /* ---------------- HUD (works without WebGL) ---------------- */
+  var hud = $('hud'), hudT = $('hud-t'), hudModel = $('hud-model');
+  var k1 = $('hud-k1'), k2 = $('hud-k2'), k3 = $('hud-k3'), v1 = $('hud-v1'), v2 = $('hud-v2'), v3 = $('hud-v3');
+  var spark = $('hud-spark'), sctx = spark.getContext('2d');
+  var labU = (CI.labels && CI.labels.upper) || 'S₁', labL = (CI.labels && CI.labels.lower) || 'S₀';
+  var ciUnit = (CI.units && CI.units.time) || 'fs', bUnit = (BE && BE.units && BE.units.time) || 'fs';
+  var COL = { pearl: tok('--pearl'), cyan: tok('--cyan'), glow: tok('--glow'), up: tok('--spin-up'),
+    down: tok('--spin-down'), line: tok('--line'), faint: tok('--faint') };
+  hud.hidden = false;
+  var lastHud = '';
+  function fmtSigned(v) { return (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(2); }
+
+  function drawSpark(mode, tNow, active) {
+    var w = spark.clientWidth, h = spark.clientHeight; if (!w || !h) return;
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    if (spark.width !== Math.round(w * dpr)) { spark.width = Math.round(w * dpr); spark.height = Math.round(h * dpr); }
+    var g = sctx; g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, w, h);
+    var T, lines, lo, hi;
+    if (mode === 'berry') {
+      var S = BE.series; T = S.tFs;
+      var ym = 1e-6; for (var i = 0; i < T.length; i++) ym = Math.max(ym, Math.abs(S.meanUp[i][1]), Math.abs(S.meanDown[i][1]));
+      lo = -ym * 1.1; hi = ym * 1.1;
+      lines = [{ v: S.meanUp.map(function (p) { return p[1]; }), c: COL.up, w: 1.4 },
+               { v: S.meanDown.map(function (p) { return p[1]; }), c: COL.down, w: 1.4 }];
+    } else {
+      T = ts; lo = 0; hi = 1;
+      lines = [{ v: SE.popUpper, c: COL.pearl, w: 1.4 }, { v: SE.popLower, c: COL.cyan, w: 1.4 }, { v: SE.coh, c: COL.glow, w: 1 }];
+    }
+    var ta = T[0], tb = T[T.length - 1];
+    var X = function (t) { return 1 + (w - 2) * (t - ta) / ((tb - ta) || 1); };
+    var Y = function (v) { return h - 2 - (h - 4) * (v - lo) / ((hi - lo) || 1); };
+    g.strokeStyle = COL.line; g.lineWidth = 1; g.beginPath();
+    var mid = mode === 'berry' ? Y(0) : Y(0.5); g.moveTo(0, Math.round(mid) + 0.5); g.lineTo(w, Math.round(mid) + 0.5); g.stroke();
+    lines.forEach(function (L) {
+      g.globalAlpha = 0.18; g.strokeStyle = L.c; g.lineWidth = 1; g.beginPath();
+      for (var i = 0; i < T.length; i++) { var x = X(T[i]), y = Y(L.v[i]); if (i) g.lineTo(x, y); else g.moveTo(x, y); }
+      g.stroke();
+      if (!active) return;
+      g.globalAlpha = 1; g.lineWidth = L.w; g.beginPath();
+      var last = null;
+      for (i = 0; i < T.length && T[i] <= tNow; i++) { x = X(T[i]); y = Y(L.v[i]); if (i) g.lineTo(x, y); else g.moveTo(x, y); last = [x, y]; }
+      if (last) {
+        var yv = Y(at1(T, L.v, tNow)); g.lineTo(X(tNow), yv); g.stroke();
+        g.fillStyle = L.c; g.beginPath(); g.arc(X(tNow), yv, 2, 0, 6.2832); g.fill();
+      }
+    });
+    g.globalAlpha = 1;
+  }
+
+  function updateHud(s) {
+    var key;
+    if (s.model === 'berry') {
+      var mu = at2(bts, BE.series.meanUp, s.tb), md = at2(bts, BE.series.meanDown, s.tb);
+      key = 'b' + s.tb.toFixed(2);
+      if (key === lastHud) return; lastHud = key;
+      hud.setAttribute('data-model', 'berry');
+      hudModel.textContent = 'Model 2 · Berry force, spin pair';
+      hudT.textContent = 't = ' + s.tb.toFixed(1) + ' ' + bUnit;
+      k1.textContent = '⟨y⟩↑'; v1.textContent = fmtSigned(mu[1]);
+      k2.textContent = '⟨y⟩↓'; v2.textContent = fmtSigned(md[1]);
+      k3.textContent = 'Δy'; v3.textContent = Math.abs(mu[1] - md[1]).toFixed(2);
+      drawSpark('berry', s.tb, s.tb > bt0 || s.P >= 5.3);
+      return;
+    }
+    key = 'c' + s.phase + s.t.toFixed(2) + (s.P >= 5.9 ? 'f' : '');
+    if (key === lastHud) return; lastHud = key;
+    hud.setAttribute('data-model', 'ci');
+    hudModel.textContent = s.P >= 5.9 ? 'Model 1 · final state' : 'Model 1 · conical intersection';
+    k1.textContent = 'P(' + labU + ')'; k2.textContent = 'P(' + labL + ')'; k3.textContent = '|ρ₁₀|';
+    if (s.phase === 'ground' || (s.phase === 'excite' && s.e < 0.5)) {
+      hudT.textContent = s.phase === 'ground' ? 't < 0' : 't → 0  (hν)';
+      v1.textContent = '0.00'; v2.textContent = '1.00'; v3.textContent = '0.00';
+      drawSpark('ci', t0, false);
+      return;
+    }
+    hudT.textContent = 't = ' + s.t.toFixed(1) + ' ' + ciUnit;
+    v1.textContent = at1(ts, SE.popUpper, s.t).toFixed(2);
+    v2.textContent = at1(ts, SE.popLower, s.t).toFixed(2);
+    v3.textContent = at1(ts, SE.coh, s.t).toFixed(2);
+    drawSpark('ci', s.t, true);
+  }
+
+  /* fill "About this simulation" with run facts from the data */
+  (function aboutFacts() {
+    var tdl = $('about-tech-dl'); if (!tdl) return;
+    var M = D.meta || {}, F = CI.frames || {}, G = CI.grid;
+    function fill(id, text) { var dd = $(id); if (!dd) return; dd.textContent = text; dd.hidden = false; if (dd.previousElementSibling) dd.previousElementSibling.hidden = false; }
+    /* the model's story in numbers, read from the series (they change if sim/precompute.py is rerun) */
+    var sm = CI.summary || {};
+    var tArr = sm.tCiArrivalFs != null ? sm.tCiArrivalFs : tPk;
+    fill('about-m1', 'The packet reaches the conical intersection about ' + tArr.toFixed(0) + ' ' + ciUnit + ' after excitation, and ' +
+      Math.round(100 * at1(ts, SE.popLower, tB)) + ' % switches to ' + labL + ' on the first pass. |ρ₁₀| peaks at ' + pk.toFixed(2) +
+      ' at ' + tPk.toFixed(1) + ' ' + ciUnit + ' and fades within a few femtoseconds. At ' + tEnd.toFixed(0) + ' ' + ciUnit + ', P(' + labL + ') = ' +
+      at1(ts, SE.popLower, tEnd).toFixed(2) + ' and still fluctuating: a hot ground-state packet spread over both wells.');
+    if (BE && BE.params) {
+      var BS = BE.series, mu1 = BS.meanUp[BS.meanUp.length - 1], md1 = BS.meanDown[BS.meanDown.length - 1];
+      var Wv = BE.params.W != null ? Math.abs(BE.params.W) : null;
+      fill('about-m2', 'H and its complex conjugate H*' + (Wv != null ? ' (W = +' + Wv + ' and −' + Wv + ')' : '') +
+        ' describe the two spin partners. Both packets start at the same point on the ' + (BE.params.shownSurface || (BE.frames.surfaceOf && BE.frames.surfaceOf.spinUp) || 'lower') +
+        ' adiabat; at ' + btEnd.toFixed(0) + ' ' + bUnit + ' spin ↑ is at ⟨y⟩ = ' + fmtSigned(mu1[1]) + ' and spin ↓ at ' + fmtSigned(md1[1]) + '.');
+    }
+    var pts0 = CI.points || {};
+    if (pts0.fc && pts0.fcVertical) { var ex = $('about-exc'); if (ex) ex.textContent = (pts0.fcVertical[2] - pts0.fc[2]).toFixed(1); }
+    var bits = [];
+    if (M.gridPoints != null) bits.push('grid ' + (Array.isArray(M.gridPoints) ? M.gridPoints.join(' × ') : M.gridPoints));
+    if (M.dtFs != null) bits.push('Δt = ' + M.dtFs + ' fs');
+    bits.push((F.n || 0) + ' frames over ' + (tEnd - t0).toFixed(0) + ' ' + ciUnit);
+    bits.push('display grid ' + G.nx + ' × ' + G.ny);
+    var a = document.createElement('dt'), b = document.createElement('dd');
+    a.textContent = 'This run'; b.textContent = bits.join(' · ') + '.';
+    tdl.appendChild(a); tdl.appendChild(b);
+  })();
+
+  /* ---------------- WebGL scene ---------------- */
+  var G3 = null;
+  try {
+    if (!window.THREE) throw new Error('three.js did not load');
+    G3 = buildScene(window.THREE);
+  } catch (err) {
+    staticBackdrop(err && err.message ? err.message : String(err));
+    G3 = null;
+  }
+
+  /* ---------------- loop ---------------- */
+  var Pd = Story.P(), raf = 0, lastNow = 0;
+  function frame(now) {
+    raf = 0;
+    var dt = lastNow ? Math.min(0.1, (now - lastNow) / 1000) : 0.016; lastNow = now;
+    var Pt = Story.P(), reduce = Story.reduce();
+    if (reduce) Pd = Pt; else Pd += (Pt - Pd) * (1 - Math.exp(-dt * 6.5));
+    if (Math.abs(Pt - Pd) < 2e-4) Pd = Pt;
+    var s = stateAt(Pd);
+    updateHud(s);
+    var ambient = false;
+    if (G3) ambient = G3.update(s, now / 1000, reduce, dt);
+    if (document.hidden) { lastNow = 0; return; }
+    if (Pd !== Pt) raf = requestAnimationFrame(frame);
+    else if (ambient && !reduce) idle = setTimeout(function () { idle = 0; lastNow = 0; if (!raf) raf = requestAnimationFrame(frame); }, 80); /* ~12 fps when only the breathing or shimmer moves */
+    else lastNow = 0;
+  }
+  var idle = 0;
+  function kick() { if (idle) { clearTimeout(idle); idle = 0; } if (!raf) raf = requestAnimationFrame(frame); }
+  Story.on(kick);
+  window.addEventListener('resize', function () { if (G3) G3.resize(); kick(); });
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) kick(); });
+  kick();
+
+
+  /* =================================================================== */
+  function buildScene(T) {
+    var canvas = $('scene');
+    var renderer = new T.WebGLRenderer({ canvas: canvas, antialias: true, alpha: false, powerPreference: 'high-performance' });
+    var phone = Math.min(window.innerWidth, window.innerHeight) < 600;
+    var PR = Math.min(window.devicePixelRatio || 1, phone ? 1.25 : 1.75);
+    renderer.setPixelRatio(PR);
+    var C = function (n) { return new T.Color(tok(n)); };
+    renderer.setClearColor(C('--ink'), 1);
+    var vtf = renderer.capabilities.maxVertexTextures > 0;
+
+    var scene = new T.Scene();
+    var camera = new T.PerspectiveCamera(36, 1, 0.1, 900);
+    var V = function (x, y, z) { return new T.Vector3(x, y, z); };
+
+    /* sky dome: night-blue zenith, dusk horizon, faint warm band */
+    var dome = new T.Mesh(new T.SphereGeometry(400, 32, 16), new T.ShaderMaterial({
+      side: T.BackSide, depthWrite: false, depthTest: false,
+      uniforms: { uTop: { value: C('--ink') }, uHor: { value: C('--dusk') }, uWarm: { value: C('--glow') } },
+      vertexShader: 'varying vec3 vD; void main(){ vD = normalize(position); vec4 p = projectionMatrix * modelViewMatrix * vec4(position, 1.0); gl_Position = p.xyww; }',
+      fragmentShader: 'uniform vec3 uTop, uHor, uWarm; varying vec3 vD; void main(){ float h = vD.y; vec3 c = mix(uHor, uTop, smoothstep(-0.02, 0.5, h)); c = mix(c, uTop * 0.75, smoothstep(0.0, -0.35, h)); c += uWarm * 0.05 * exp(-pow((h - 0.01) / 0.07, 2.0)) * smoothstep(-0.3, 1.0, -vD.x); gl_FragColor = vec4(c, 1.0); }'
+    }));
+    dome.renderOrder = -10; scene.add(dome);
+
+    /* ---------- shaders ---------- */
+    var SURF_VS = [
+      'attribute float aE;',
+      'varying vec3 vW; varying vec3 vN; varying float vE; varying vec2 vUv;',
+      'void main(){ vUv = uv; vE = aE; vec4 w = modelMatrix * vec4(position, 1.0); vW = w.xyz;',
+      '  vN = normalize(mat3(modelMatrix) * normal); gl_Position = projectionMatrix * viewMatrix * w; }'
+    ].join('\n');
+    var SURF_FS = [
+      'uniform vec3 uLow, uMid, uHigh, uLine, uFog, uCol0, uCol1;',
+      'uniform float uEMin, uERange, uStep, uMajor, uAlpha, uFogNear, uFogFar, uMix, uGain0, uGain1, uShim, uTime, uOpacity, uTint, uSheen, uLineK, uIsoOn, uRim, uGridA;',
+      'uniform vec2 uTexN, uEdge, uGridN, uGridO; uniform sampler2D uDens;',
+      'varying vec3 vW; varying vec3 vN; varying float vE; varying vec2 vUv;',
+      'float iso(float v, float s){ float f = v / s; float w = fwidth(f); return 1.0 - smoothstep(0.0, 1.0, abs(fract(f - 0.5) - 0.5) / max(w, 1e-4)); }',
+      'void main(){',
+      '  vec3 N = normalize(vN); if (!gl_FrontFacing) N = -N;',
+      '  vec3 Vd = normalize(cameraPosition - vW);',
+      '  vec3 L = normalize(vec3(-0.45, 0.8, 0.42));',
+      '  float diff = max(dot(N, L), 0.0);',
+      '  float fres = pow(1.0 - abs(dot(N, Vd)), 3.0);',
+      '  float h = clamp((vE - uEMin) / uERange, 0.0, 1.0);',
+      '  vec3 base = h < 0.5 ? mix(uLow, uMid, h * 2.0) : mix(uMid, uHigh, h * 2.0 - 1.0);',
+      '  vec3 col = base * (0.3 + 0.56 * diff) + base * fres * uSheen;',
+      /* energy contours (faded out right at the bottom of a well, where the coarse grid makes tiny rings jagged), or a coordinate grid */
+      '  float ln = uIsoOn * clamp(iso(vE, uStep) * 0.55 + iso(vE, uMajor) * 0.6, 0.0, 1.0) * smoothstep(0.15, 0.4, vE - uEMin);',
+      '  vec2 gq = uGridO + vUv * uGridN; vec2 gw = abs(fract(gq - 0.5) - 0.5) / max(fwidth(gq), vec2(1e-4));',
+      '  ln = max(ln, uGridA * (1.0 - smoothstep(0.0, 1.0, min(gw.x, gw.y))));',
+      '  col = mix(col, uLine, ln * uLineK);',
+      '  vec4 d = texture2D(uDens, (vUv * (uTexN - 1.0) + 0.5) / uTexN);',
+      '  float d0 = mix(d.r, d.g, uMix) * uGain0, d1 = mix(d.b, d.a, uMix) * uGain1;',
+      '  float sh = uShim > 0.5 ? 0.45 + 0.55 * (0.5 + 0.5 * sin(uTime * 4.2 + vW.x * 2.7 - vW.z * 1.9)) : 1.0;',
+      '  float p0 = smoothstep(0.1, 0.9, d0) * uTint, p1 = smoothstep(0.05, 1.0, d1) * uTint * sh;',
+      '  col = mix(col, uCol0 * (0.5 + 0.4 * diff), clamp(p0, 0.0, 0.6)) + uCol0 * p0 * 0.06 + uCol1 * p1 * 0.35;',
+      '  float em = max(p0, p1 * 0.6);',
+      '  float edge = smoothstep(0.0, uEdge.x, min(vUv.x, 1.0 - vUv.x)) * smoothstep(0.0, uEdge.y, min(vUv.y, 1.0 - vUv.y));',
+      '  float a = uAlpha + (1.0 - uAlpha) * fres * uRim + ln * 0.08;',
+      '  a = max(a, clamp(em, 0.0, 1.0) * 0.5);',
+      '  float fogf = smoothstep(uFogNear, uFogFar, length(vW - cameraPosition));',
+      '  col = mix(col, uFog, fogf);',
+      '  float fa = clamp(a, 0.0, 1.0) * edge * uOpacity;',
+      '  if (fa < 0.02) discard;',
+      '  gl_FragColor = vec4(col, fa);',
+      '}'
+    ].join('\n');
+    var MOUND_VS = [
+      'uniform sampler2D uDens; uniform vec2 uTexN; uniform float uMix, uGain0, uGain1, uH, uLift, uUse1; uniform vec2 uCell;',
+      'varying float vD0, vD1; varying vec3 vW, vN; varying vec2 vUv;',
+      /* cubic B-spline sampling from 4 bilinear taps, so the mounds are smooth domes rather than tents */
+      'vec4 cubicB(float v){ vec4 n = vec4(1.0, 2.0, 3.0, 4.0) - v; vec4 s = n * n * n; float x = s.x, y = s.y - 4.0 * s.x, z = s.z - 4.0 * s.y + 6.0 * s.x; return vec4(x, y, z, 6.0 - x - y - z) / 6.0; }',
+      'vec4 texB(vec2 q){ vec2 st = clamp(q, 0.0, 1.0) * (uTexN - 1.0); vec2 i = floor(st), f = st - i;',
+      '  vec4 xc = cubicB(f.x), yc = cubicB(f.y); vec4 c = i.xxyy + vec2(-0.5, 1.5).xyxy;',
+      '  vec4 sm = vec4(xc.xz + xc.yw, yc.xz + yc.yw); vec4 off = (c + vec4(xc.yw, yc.yw) / sm + 0.5) / uTexN.xxyy;',
+      '  vec4 s0 = texture2D(uDens, off.xz), s1 = texture2D(uDens, off.yz), s2 = texture2D(uDens, off.xw), s3 = texture2D(uDens, off.yw);',
+      '  float sx = sm.x / (sm.x + sm.y), sy = sm.z / (sm.z + sm.w); return mix(mix(s3, s2, sx), mix(s1, s0, sx), sy); }',
+      'vec2 dd(vec2 q){ vec4 d = texB(q);',
+      '  return vec2(mix(d.r, d.g, uMix) * uGain0, mix(d.b, d.a, uMix) * uGain1); }',
+      'void main(){ vUv = uv; vec2 c = dd(uv); vD0 = c.x; vD1 = c.y;',
+      '  vec2 ex = vec2(1.0 / (uTexN.x - 1.0), 0.0), ey = vec2(0.0, 1.0 / (uTexN.y - 1.0));',
+      '  vec2 gx = dd(uv + ex) - dd(uv - ex), gy = dd(uv + ey) - dd(uv - ey);',
+      '  bool first = c.x >= c.y * uUse1; float hx = first ? gx.x : gx.y * uUse1, hz = first ? gy.x : gy.y * uUse1;',
+      '  float sx = hx * uH / (2.0 * ex.x * uCell.x), sz = hz * uH / (2.0 * ey.y * uCell.y);',
+      '  vN = normalize(normalize(normal) + vec3(-sx, 0.0, -sz));',
+      '  vec3 p = position + vec3(0.0, uLift + uH * max(c.x, c.y * uUse1), 0.0);',
+      '  vec4 w = modelMatrix * vec4(p, 1.0); vW = w.xyz; gl_Position = projectionMatrix * viewMatrix * w; }'
+    ].join('\n');
+    var MOUND_FS = [
+      'uniform vec3 uCol0, uCol1, uCore, uFog; uniform float uFogNear, uFogFar, uI, uShim1, uTime;',
+      'varying float vD0, vD1; varying vec3 vW, vN; varying vec2 vUv;',
+      'void main(){ float a0 = clamp(vD0, 0.0, 1.0), c1 = clamp(vD1, 0.0, 1.0);',
+      '  float a1 = uShim1 > 0.5 ? 0.0 : c1; float d = max(a0, a1);',
+      /* channel 1 as coherence: a pale glint that rides on top of the packet */
+      '  float glint = uShim1 > 0.5 ? smoothstep(0.08, 0.7, c1) * (0.45 + 0.55 * sin(uTime * 5.0 + vW.x * 3.1 - vW.z * 2.3)) : 0.0;',
+      '  if (d < 0.07 && glint < 0.04) discard;',
+      '  vec3 N = normalize(vN); vec3 Vd = normalize(cameraPosition - vW); if (dot(N, Vd) < 0.0) N = -N;',
+      '  float fres = pow(1.0 - abs(dot(N, Vd)), 2.0);',
+      '  vec3 col = (uCol0 * a0 + uCol1 * a1) / max(a0 + a1, 1e-4);',
+      '  vec3 Ld = normalize(vec3(-0.45, 0.8, 0.42));',
+      '  float diff = max(dot(N, Ld), 0.0);',
+      '  float spec = pow(max(dot(reflect(-Ld, N), Vd), 0.0), 18.0);',
+      /* mostly self-lit (it is a glow, not clay): a little diffuse for the shape, a hot core where |psi| is large, a warm rim */
+      '  vec3 body = col * (0.52 + 0.55 * diff);',
+      '  body = mix(body, uCore, smoothstep(0.6, 1.0, d) * 0.45) + uCore * spec * 0.14 + col * fres * 0.4;',
+      '  float edge = smoothstep(0.0, 0.05, min(vUv.x, 1.0 - vUv.x)) * smoothstep(0.0, 0.06, min(vUv.y, 1.0 - vUv.y));',
+      '  float fogf = smoothstep(uFogNear, uFogFar, length(vW - cameraPosition));',
+      '  float alpha = smoothstep(0.07, 0.36, d) * (0.82 + 0.18 * fres) * uI * edge;',
+      '  body = mix(body, uFog, fogf * 0.8);',
+      '  gl_FragColor = vec4(body * alpha + uCol1 * glint * 0.6, max(alpha, glint * 0.4)); }'
+    ].join('\n');
+
+    var fogU = { col: C('--ink').lerp(C('--dusk'), 0.35), near: 30, far: 90 };
+    var timeU = { value: 0 };
+
+    /* ---------- one landscape (a model's two adiabatic surfaces + densities) ---------- */
+    function Landscape(M, o) {
+      var G = M.grid, nx = G.nx | 0, ny = G.ny | 0, NN = nx * ny;
+      var Es = { lower: b64f32(M.surfaces.lower), upper: b64f32(M.surfaces.upper) };
+      var sc = o.width / (G.x1 - G.x0), xc = (G.x0 + G.x1) / 2, yc = (G.y0 + G.y1) / 2;
+      var hE = o.hE, origin = o.origin;
+      var self = this;
+      this.M = M; this.sc = sc; this.hE = hE;
+      this.world = function (x, y, e, out) { return (out || new T.Vector3()).set(origin.x + (x - xc) * sc, origin.y + hE(e), origin.z + (y - yc) * sc); };
+      this.Eat = function (surf, x, y) {
+        var A = Es[surf], fi = clamp((x - G.x0) / (G.x1 - G.x0), 0, 1) * (nx - 1), fj = clamp((y - G.y0) / (G.y1 - G.y0), 0, 1) * (ny - 1);
+        var i = Math.min(nx - 2, Math.floor(fi)), j = Math.min(ny - 2, Math.floor(fj)), a = fi - i, b = fj - j;
+        var p = j * nx + i;
+        return (A[p] * (1 - a) + A[p + 1] * a) * (1 - b) + (A[p + nx] * (1 - a) + A[p + nx + 1] * a) * b;
+      };
+      this.range = function () {
+        var lo = Infinity, hi = -Infinity;
+        ['lower', 'upper'].forEach(function (k) { var A = Es[k]; for (var p = 0; p < A.length; p++) { if (A[p] < lo) lo = A[p]; if (A[p] > hi) hi = A[p]; } });
+        return [lo, hi];
+      };
+
+      /* frames: [frame][channel][j][i] uint8, sqrt encoded */
+      var F = M.frames, nch = F.channels.length, fd = b64u8(F.data);
+      var fN = F.n ? fd.length / (F.n * nch) : 0;
+      var fnx = nx, fny = ny;
+      var fg = F.grid || (F.nx ? F : null);
+      if (fN !== NN && fg && fg.nx * fg.ny === fN) { fnx = fg.nx | 0; fny = fg.ny | 0; }
+      if (fnx * fny !== fN) { console.warn('[wavepacket] frame size mismatch', fN, nx, ny); fN = 0; }
+      this.F = F; this.fd = fd; this.fN = fN; this.fnx = fnx; this.fny = fny; this.nch = nch;
+      /* peak byte of every frame and channel, for the per-frame display gain late in a run */
+      var peaks = new Uint8Array((F.n || 0) * nch);
+      for (var pk_ = 0; fN && pk_ < peaks.length; pk_++) { var mxb = 0, o0_ = pk_ * fN; for (var pp_ = 0; pp_ < fN; pp_++) if (fd[o0_ + pp_] > mxb) mxb = fd[o0_ + pp_]; peaks[pk_] = mxb; }
+      this.chIndex = {}; F.channels.forEach(function (ch, k) { self.chIndex[ch] = k; });
+      var on = { lower: [], upper: [] };
+      F.channels.forEach(function (ch, k) { var sf = F.surfaceOf && F.surfaceOf[ch]; if (on[sf] && on[sf].length < 2) on[sf].push(k); });
+      this.on = on;
+
+      /* geometry, positions in world space, index = j*nx + i as in the data */
+      /* geometry, positions in world space; k > 1 subdivides (bilinear in E) for the smoother packet mounds */
+      function geom(A, k) {
+        k = k || 1;
+        var NX = (nx - 1) * k + 1, NY = (ny - 1) * k + 1, NV = NX * NY;
+        var pos = new Float32Array(NV * 3), uvs = new Float32Array(NV * 2), ae = new Float32Array(NV);
+        for (var j = 0; j < NY; j++) for (var i = 0; i < NX; i++) {
+          var p = j * NX + i, fi = i / k, fj = j / k, i0 = Math.min(nx - 2, Math.floor(fi)), j0 = Math.min(ny - 2, Math.floor(fj));
+          var a = fi - i0, b = fj - j0, q = j0 * nx + i0;
+          var e = (A[q] * (1 - a) + A[q + 1] * a) * (1 - b) + (A[q + nx] * (1 - a) + A[q + nx + 1] * a) * b;
+          var x = G.x0 + fi * (G.x1 - G.x0) / (nx - 1), y = G.y0 + fj * (G.y1 - G.y0) / (ny - 1);
+          pos[p * 3] = origin.x + (x - xc) * sc; pos[p * 3 + 1] = origin.y + hE(e); pos[p * 3 + 2] = origin.z + (y - yc) * sc;
+          uvs[p * 2] = i / (NX - 1); uvs[p * 2 + 1] = j / (NY - 1); ae[p] = e;
+        }
+        var idx = new (NV > 65535 ? Uint32Array : Uint16Array)((NX - 1) * (NY - 1) * 6), n = 0;
+        for (j = 0; j < NY - 1; j++) for (i = 0; i < NX - 1; i++) {
+          var v0 = j * NX + i, v1 = v0 + NX, v2 = v0 + 1, v3 = v1 + 1;
+          idx[n++] = v0; idx[n++] = v1; idx[n++] = v2; idx[n++] = v1; idx[n++] = v3; idx[n++] = v2;
+        }
+        var g = new T.BufferGeometry();
+        g.setAttribute('position', new T.BufferAttribute(pos, 3));
+        g.setAttribute('uv', new T.BufferAttribute(uvs, 2));
+        g.setAttribute('aE', new T.BufferAttribute(ae, 1));
+        g.setIndex(new T.BufferAttribute(idx, 1)); g.computeVertexNormals();
+        return g;
+      }
+
+      this.tex = {}; this.mats = {}; this.mounds = {}; this.meshes = {};
+      ['lower', 'upper'].forEach(function (sf) {
+        var st = o.surf[sf];
+        var data = new Uint8Array(fnx * fny * 4);
+        var tex = new T.DataTexture(data, fnx, fny, T.RGBAFormat, T.UnsignedByteType);
+        tex.minFilter = T.LinearFilter; tex.magFilter = T.LinearFilter; tex.generateMipmaps = false;
+        tex.wrapS = tex.wrapT = T.ClampToEdgeWrapping; tex.needsUpdate = true;
+        self.tex[sf] = tex;
+        var chs = on[sf].map(function (k) { return o.ch[F.channels[k]] || {}; });
+        var c0 = chs[0] || {}, c1 = chs[1] || {};
+        var U = {
+          uLow: { value: st.low }, uMid: { value: st.mid }, uHigh: { value: st.high }, uLine: { value: st.line },
+          uFog: { value: fogU.col }, uFogNear: { value: 30 }, uFogFar: { value: 90 },
+          uEMin: { value: st.eMin }, uERange: { value: st.eRange }, uStep: { value: o.step }, uMajor: { value: o.major },
+          uAlpha: { value: st.alpha }, uSheen: { value: st.sheen }, uOpacity: { value: 1 },
+          uCol0: { value: c0.color || C('--glow') }, uCol1: { value: c1.color || C('--glow') },
+          uMix: { value: 0 }, uGain0: { value: 1 }, uGain1: { value: 1 }, uShim: { value: c1.shimmer ? 1 : 0 },
+          uTint: { value: st.tint }, uTime: timeU, uTexN: { value: new T.Vector2(fnx, fny) }, uDens: { value: tex },
+          uEdge: { value: new T.Vector2(o.edge ? o.edge[0] : 0.07, o.edge ? o.edge[1] : 0.09) },
+          uLineK: { value: st.lineK != null ? st.lineK : 0.3 }, uIsoOn: { value: o.grid ? 0 : 1 }, uRim: { value: st.rim != null ? st.rim : 0.35 },
+          uGridA: { value: o.grid ? o.grid[2] : 0 }, uGridN: { value: new T.Vector2(o.grid ? o.grid[0] : 1, o.grid ? o.grid[1] : 1) },
+          uGridO: { value: new T.Vector2(o.grid ? o.grid[3] : 0, o.grid ? o.grid[4] : 0) }
+        };
+        var mat = new T.ShaderMaterial({ uniforms: U, vertexShader: SURF_VS, fragmentShader: SURF_FS, transparent: true,
+          depthWrite: st.depthWrite, side: T.DoubleSide, extensions: { derivatives: true } });
+        var g = geom(Es[sf]);
+        var mesh = new T.Mesh(g, mat); mesh.renderOrder = st.order; mesh.frustumCulled = false; scene.add(mesh);
+        self.mats[sf] = mat; self.meshes[sf] = mesh;
+        if (vtf && on[sf].length && (c0.mound || c1.mound)) {
+          var MU = {
+            uDens: { value: tex }, uTexN: U.uTexN, uMix: U.uMix, uGain0: U.uGain0, uGain1: U.uGain1,
+            uH: { value: o.moundH }, uLift: { value: o.moundH * 0.04 }, uUse1: { value: c1.mound ? 1 : 0 },
+            uCell: { value: new T.Vector2((G.x1 - G.x0) * sc, (G.y1 - G.y0) * sc) },
+            uCol0: { value: c0.color || C('--glow') }, uCol1: { value: c1.color || C('--glow') }, uCore: { value: C('--glow-core') }, uFog: { value: fogU.col },
+            uFogNear: U.uFogNear, uFogFar: U.uFogFar, uI: { value: 1 }, uShim1: { value: c1.shimmer ? 1 : 0 }, uTime: timeU
+          };
+          var mm = new T.Mesh(geom(Es[sf], Math.max(1, Math.min(4, Math.round(240 / Math.max(nx, ny))))), new T.ShaderMaterial({ uniforms: MU, vertexShader: MOUND_VS, fragmentShader: MOUND_FS,
+            transparent: true, depthWrite: false, side: T.DoubleSide, blending: T.CustomBlending, blendSrc: T.OneFactor, blendDst: T.OneMinusSrcAlphaFactor,
+            blendSrcAlpha: T.OneFactor, blendDstAlpha: T.OneMinusSrcAlphaFactor }));
+          mm.renderOrder = st.order + 1; mm.frustumCulled = false; scene.add(mm);
+          if (!c0.mound) MU.uGain0 = { value: 0 };
+          self.mounds[sf] = mm;
+        }
+      });
+
+      /* texture filling */
+      var key = '';
+      function put(sf, a0, b0, a1, b1) {
+        var arr = self.tex[sf].image.data;
+        for (var p = 0; p < fN; p++) {
+          var q = p * 4;
+          arr[q] = a0 ? a0[p] : 0; arr[q + 1] = b0 ? b0[p] : 0; arr[q + 2] = a1 ? a1[p] : 0; arr[q + 3] = b1 ? b1[p] : 0;
+        }
+        self.tex[sf].needsUpdate = true;
+      }
+      function chan(k, ci) { return ci == null || !fN ? null : fd.subarray((k * nch + ci) * fN, (k * nch + ci + 1) * fN); }
+      this.setFrame = function (t) {
+        if (!fN) return;
+        var kf = locate(F.tFs, t), k = kf[0], k1 = Math.min(k + 1, F.n - 1);
+        if (key !== 'f' + k) {
+          key = 'f' + k;
+          ['lower', 'upper'].forEach(function (sf) {
+            var c = on[sf]; put(sf, chan(k, c[0]), chan(k1, c[0]), chan(k, c[1]), chan(k1, c[1]));
+          });
+        }
+        ['lower', 'upper'].forEach(function (sf) { self.mats[sf].uniforms.uMix.value = kf[1]; });
+      };
+      this.setCustom = function (name, lowerArr, upperArr) {
+        if (key === name) return; key = name;
+        put('lower', lowerArr, lowerArr, null, null);
+        put('upper', upperArr, upperArr, null, null);
+        self.mats.lower.uniforms.uMix.value = 0; self.mats.upper.uniforms.uMix.value = 0;
+      };
+      this.chan = chan;
+      this.gains = function (sf, g0, g1) { var u = self.mats[sf].uniforms; u.uGain0.value = g0; u.uGain1.value = g1; };
+      this.setFog = function (n, f) { ['lower', 'upper'].forEach(function (sf) { var u = self.mats[sf].uniforms; u.uFogNear.value = n; u.uFogFar.value = f; }); };
+      this.opacity = function (sf, a) { self.mats[sf].uniforms.uOpacity.value = a; };
+      this.lineK = function (sf, k) { self.mats[sf].uniforms.uLineK.value = k; };
+      this.moundI = function (sf, v) { if (self.mounds[sf]) self.mounds[sf].material.uniforms.uI.value = v; };
+      this.moundH = function (sf, h) { if (self.mounds[sf]) { var u = self.mounds[sf].material.uniforms; u.uH.value = h; u.uLift.value = h * 0.04; } };
+      /* interpolated peak of one channel at time t, as a fraction of the channel's all-time maximum (sqrt-encoded) */
+      this.peak = function (chName, t) {
+        var ci = self.chIndex[chName]; if (ci == null || !fN) return 1;
+        var kf = locate(F.tFs, t), k = kf[0], k1 = Math.min(k + 1, F.n - 1);
+        return Math.max(1, lerp(peaks[k * nch + ci], peaks[k1 * nch + ci], kf[1])) / 255;
+      };
+
+      /* density-weighted centroids of one channel, split at x = splitX (for the two-lobe bubbles) */
+      this.split = function (chName, t, splitX) {
+        var ci = self.chIndex[chName]; if (ci == null || !fN) return null;
+        var kf = locate(F.tFs, t), k = kf[0], k1 = Math.min(k + 1, F.n - 1), f = kf[1];
+        var A = chan(k, ci), B = chan(k1, ci), out = [[0, 0, 0], [0, 0, 0]];
+        for (var j = 0; j < fny; j++) {
+          var y = G.y0 + j * (G.y1 - G.y0) / (fny - 1);
+          for (var i = 0; i < fnx; i++) {
+            var p = j * fnx + i, s = (A[p] + (B[p] - A[p]) * f) / 255, v = s * s;
+            if (v < 1e-4) continue;
+            var x = G.x0 + i * (G.x1 - G.x0) / (fnx - 1), r = out[x < splitX ? 0 : 1];
+            r[0] += v; r[1] += v * x; r[2] += v * y;
+          }
+        }
+        return out.map(function (r) { return r[0] > 0 ? { w: r[0], x: r[1] / r[0], y: r[2] / r[0] } : { w: 0, x: 0, y: 0 }; });
+      };
+      /* the same, split further by the sign of y: [reactant y<0, reactant y>=0, product y<0, product y>=0] */
+      this.lobes = function (chName, t, splitX) {
+        var ci = self.chIndex[chName]; if (ci == null || !fN) return null;
+        var kf = locate(F.tFs, t), k = kf[0], k1 = Math.min(k + 1, F.n - 1), f = kf[1];
+        var A = chan(k, ci), B = chan(k1, ci), out = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]];
+        for (var j = 0; j < fny; j++) {
+          var y = G.y0 + j * (G.y1 - G.y0) / (fny - 1);
+          for (var i = 0; i < fnx; i++) {
+            var p = j * fnx + i, s = (A[p] + (B[p] - A[p]) * f) / 255, v = s * s;
+            if (v < 1e-4) continue;
+            var x = G.x0 + i * (G.x1 - G.x0) / (fnx - 1), r = out[(x < splitX ? 0 : 2) + (y < 0 ? 0 : 1)];
+            r[0] += v; r[1] += v * x; r[2] += v * y;
+          }
+        }
+        return out.map(function (r) { return r[0] > 0 ? { w: r[0], x: r[1] / r[0], y: r[2] / r[0] } : { w: 0, x: 0, y: 0 }; });
+      };
+      /* grid of a Gaussian (sqrt-encoded like the frames) for the resting packet */
+      this.gauss = function (cx, cy, sx, sy) {
+        var a = new Uint8Array(fN);
+        for (var j = 0; j < fny; j++) for (var i = 0; i < fnx; i++) {
+          var x = G.x0 + i * (G.x1 - G.x0) / (fnx - 1), y = G.y0 + j * (G.y1 - G.y0) / (fny - 1);
+          a[j * fnx + i] = Math.round(255 * Math.exp(-((x - cx) * (x - cx)) / (4 * sx * sx) - ((y - cy) * (y - cy)) / (4 * sy * sy)));
+        }
+        return a;
+      };
+      this.bounds = { x0: G.x0, x1: G.x1, y0: G.y0, y1: G.y1, xc: xc, yc: yc };
+    }
+
+    /* ---------- CI landscape ---------- */
+    var pts = CI.points || {};
+    var fcv = pts.fcVertical || [0, 0, 4.5], fc = pts.fc || [fcv[0], fcv[1], 0];
+    var ciP = pts.ci || [0, 0, 1], prod = pts.product || ciP;
+    var eFcv = fcv[2] > 0 ? fcv[2] : 4.5;
+    /* horizontal scale from the action region (FC -> CI -> product), not the whole grid; vertical: 4.2 world units per FC excitation */
+    var span = Math.max(4, Math.abs(prod[0] - fc[0]), Math.abs(ciP[0] - fc[0]) * 1.4);
+    var sCI = 10.5 / span, WCI = sCI * (CI.grid.x1 - CI.grid.x0), eS = 4.2 / eFcv, Ek = eFcv * 1.12, kw = 0.9;
+    function hCI(E) { var e = E; if (e > Ek) { var d = e - Ek; e = Ek + d / (1 + d / kw); } return e * eS; }
+    var stLowerCI = { low: C('--deep').multiplyScalar(0.85), mid: C('--deep').lerp(C('--cyan'), 0.5), high: C('--cyan'),
+      line: C('--cyan').lerp(C('--pearl'), 0.6), eMin: Math.min(0, fc[2]), eRange: eFcv * 0.95, alpha: 1, sheen: 0.2,
+      tint: 1.0, depthWrite: true, order: 0 };
+    /* S1: her bright pearl sheet, translucent, with a thin bright rim where it turns away from the viewer */
+    var stUpper = { low: C('--pearl').multiplyScalar(0.88), mid: C('--pearl').multiplyScalar(0.95), high: C('--pearl'),
+      line: C('--pearl'), eMin: 0, eRange: 1, alpha: 0.24, sheen: 0.6, rim: 0.55, lineK: 0.22, tint: 0.9, depthWrite: false, order: 4 };
+    var ciL = new Landscape(CI, {
+      width: WCI, origin: V(0, 0, 0), hE: hCI, step: 0.25, major: 1.0, moundH: 0.9,
+      surf: { lower: stLowerCI, upper: stUpper },
+      ch: { upper: { color: C('--glow'), mound: true }, lower: { color: C('--glow'), mound: true }, coh: { color: C('--coh'), shimmer: true } }
+    });
+    var ground = ciL.gauss(fc[0], fc[1], (CI.ground && CI.ground.sigmaX) || 0.71, (CI.ground && CI.ground.sigmaY) || 0.71);
+    var upper0 = ciL.chan(0, ciL.chIndex.upper);
+
+    /* ---------- Berry landscape ---------- */
+    var ciRight = (CI.grid.x1 - (CI.grid.x0 + CI.grid.x1) / 2) * sCI;
+    var bL = null, OB = V(ciRight + 13, -0.8, -14);
+    if (BE) {
+      var EsL = b64f32(BE.surfaces.lower), EsU = b64f32(BE.surfaces.upper), blo = Infinity, bhi = -Infinity;
+      for (var q = 0; q < EsL.length; q++) { blo = Math.min(blo, EsL[q], EsU[q]); bhi = Math.max(bhi, EsL[q], EsU[q]); }
+      var bR = (bhi - blo) || 1, bS = 3.4 / bR;
+      var bUnitsE = (BE.units && BE.units.energy) || '';
+      var bStep = (function (r) { var b = Math.pow(10, Math.floor(Math.log10(r))), c = [1, 2, 2.5, 5, 10]; for (var k = 0; k < c.length; k++) if (c[k] * b >= r) return c[k] * b; return 10 * b; })(bR / 10);
+      /* the Berry surfaces are flat in y and only ramp gently in x, so energy contours would be straight scratches:
+         draw a faint coordinate grid instead (every 2 units), which also makes the sideways deflection easy to read */
+      var BG = BE.grid, bLoMax = -Infinity; for (q = 0; q < EsL.length; q++) bLoMax = Math.max(bLoMax, EsL[q]);
+      bL = new Landscape(BE, {
+        width: 17, origin: OB, hE: function (E) { return (E - blo) * bS; }, step: bStep, major: bStep * 4, moundH: 0.55, edge: [0.1, 0.1],
+        grid: [(BG.x1 - BG.x0) / 2, (BG.y1 - BG.y0) / 2, 0.55, BG.x0 / 2, BG.y0 / 2],
+        surf: {
+          lower: { low: C('--deep').multiplyScalar(0.9), mid: C('--deep').lerp(C('--cyan'), 0.55), high: C('--cyan'),
+            line: C('--cyan').lerp(C('--pearl'), 0.7), eMin: blo, eRange: (bLoMax - blo) * 1.5 || bR, alpha: 1, sheen: 0.35, lineK: 0.4,
+            tint: 1.1, depthWrite: true, order: 0 },
+          upper: Object.assign({}, stUpper, { alpha: 0.12, lineK: 0.12, order: 4 })
+        },
+        ch: { spinUp: { color: C('--spin-up'), mound: true }, spinDown: { color: C('--spin-down'), mound: true } }
+      });
+    }
+
+    /* ---------- key world points ---------- */
+    var W = function (L, x, y, e) { return L.world(x, y, e, new T.Vector3()); };
+    var pFC = W(ciL, fc[0], fc[1], ciL.Eat('lower', fc[0], fc[1]));
+    var pFCv = W(ciL, fcv[0], fcv[1], ciL.Eat('upper', fcv[0], fcv[1]));
+    var pCI = W(ciL, ciP[0], ciP[1], ciP[2]);
+    var pPR = W(ciL, prod[0], prod[1], ciL.Eat('lower', prod[0], prod[1]));
+    var cB = ciL.bounds, C0 = W(ciL, (fc[0] + prod[0]) / 2, (fc[1] + prod[1]) / 2, 0.6);
+    var pB = bL ? bL.world(bL.bounds.xc, bL.bounds.yc, (function () { var r = bL.range(); return r[0] + 0.4 * (r[1] - r[0]); })()) : V(31, 0, -15);
+    var MID = C0.clone().lerp(pB, 0.5);
+    var xFar = prod[0], yFar = prod[1], tFarEnd = TL.ch4[2][1];
+    for (var q2 = 0; q2 < ts.length; q2++) if (ts[q2] >= TL.tB && ts[q2] <= tFarEnd && SE.meanLower[q2][0] > xFar) { xFar = SE.meanLower[q2][0]; yFar = SE.meanLower[q2][1]; }
+    xFar = Math.min(xFar, cB.x1 - 3);                        /* turning point on the far wall, where the two lobes pass either side of the ridge */
+    var pFar = W(ciL, xFar, yFar, ciL.Eat('lower', xFar, yFar));
+    /* middle of the Berry packets' path (start -> end centroids), for the spin chapter camera */
+    var pBpath = pB.clone();
+    if (bL) { var mu0 = BE.series.meanUp[0], mu1 = BE.series.meanUp[BE.series.meanUp.length - 1], md1 = BE.series.meanDown[BE.series.meanDown.length - 1];
+      var px = (mu0[0] + (mu1[0] + md1[0]) / 2) / 2, py = (mu0[1] + (mu1[1] + md1[1]) / 2) / 2;
+      pBpath = W(bL, px, py, bL.Eat('lower', px, py)); }
+
+    /* ---------- photon arrow ---------- */
+    var arrowMat = new T.MeshBasicMaterial({ color: C('--photon'), transparent: true, depthWrite: false });
+    var shaft = new T.Mesh(new T.CylinderGeometry(0.045, 0.045, 1, 12).translate(0, 0.5, 0), arrowMat);
+    var head = new T.Mesh(new T.ConeGeometry(0.15, 0.42, 18).translate(0, -0.21, 0), arrowMat);
+    var arrow = new T.Group(); arrow.add(shaft); arrow.add(head);
+    var aBase = pFC.clone().add(V(0, 0.1, 0)), aTop = pFCv.clone().add(V(0, -0.12, 0)), aLen = Math.max(0.5, aTop.y - aBase.y);
+    arrow.position.copy(aBase); arrow.renderOrder = 8; shaft.renderOrder = 8; head.renderOrder = 8; scene.add(arrow);
+
+    /* ---------- glow sprites ---------- */
+    var gc = document.createElement('canvas'); gc.width = gc.height = 128;
+    var gx = gc.getContext('2d'), grd = gx.createRadialGradient(64, 64, 0, 64, 64, 64);
+    grd.addColorStop(0, 'rgba(255,255,255,1)'); grd.addColorStop(0.25, 'rgba(255,255,255,.55)'); grd.addColorStop(1, 'rgba(255,255,255,0)');
+    gx.fillStyle = grd; gx.fillRect(0, 0, 128, 128);
+    var glowTex = new T.CanvasTexture(gc);
+    function sprite(colorTok, size) {
+      var s = new T.Sprite(new T.SpriteMaterial({ map: glowTex, color: C(colorTok), transparent: true, depthWrite: false, blending: T.AdditiveBlending }));
+      s.scale.set(size, size, 1); s.renderOrder = 9; scene.add(s); return s;
+    }
+    var photonGlow = sprite('--photon', 1.1);
+    /* where the two surfaces touch: a warm-white glint, so the cone tip stands out from the orange packet */
+    var ciGlow = sprite('--glow-core', 2.2); ciGlow.position.copy(pCI);
+
+    /* ---------- radical-pair disc ---------- */
+    var rp = CI.radicalPair || { x: ciP[0], y: ciP[1], r: 2 };
+    var disc = new T.Mesh(new T.CircleGeometry(Math.max(0.3, rp.r * ciL.sc), 72), new T.ShaderMaterial({
+      transparent: true, depthWrite: false, side: T.DoubleSide,
+      uniforms: { uCol: { value: C('--glow').lerp(C('--pearl'), 0.15) }, uA: { value: 0 } },
+      vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+      /* a region marker, not more orange: a faint fill and a thin rim */
+      fragmentShader: 'uniform vec3 uCol; uniform float uA; varying vec2 vUv; void main(){ float r = length(vUv - 0.5) * 2.0; float w = fwidth(r); float rim = smoothstep(0.93 - 2.0 * w, 0.95, r) * (1.0 - smoothstep(0.97, 0.99 + w, r)); float a = 0.28 * smoothstep(1.0, 0.86, r) * smoothstep(0.1, 0.9, r) + rim; gl_FragColor = vec4(uCol, a * uA); }',
+      extensions: { derivatives: true }
+    }));
+    disc.rotation.x = -Math.PI / 2;
+    disc.position.copy(W(ciL, rp.x, rp.y, ciP[2])).add(V(0, 0.02, 0));
+    disc.renderOrder = 3; scene.add(disc);
+
+    /* ---------- axes (a quiet plot frame under the CI landscape) ---------- */
+    var axMat = new T.LineBasicMaterial({ color: C('--faint'), transparent: true, opacity: 0.45, depthWrite: false });
+    var ax = [], xA = Math.max(cB.x0, fc[0] - 0.45 * span), xB = Math.min(cB.x1, prod[0] + 0.45 * span), yA = cB.y0, yB = cB.y1, yFront = yB;
+    function seg(a, b) { ax.push(a.x, a.y, a.z, b.x, b.y, b.z); }
+    var o0 = W(ciL, xA, yFront, 0), o1 = W(ciL, xB, yFront, 0), o2 = W(ciL, xA, yA, 0);
+    seg(o0, o1); seg(o0, o2);
+    var eTop = Math.max(1, Math.floor(Ek)), eTicks = [];
+    seg(o0, W(ciL, xA, yFront, eTop));
+    for (var e = 0; e <= eTop; e++) { var tp = W(ciL, xA, yFront, e); seg(tp, tp.clone().add(V(-0.25, 0, 0))); eTicks.push([e, tp]); }
+    var axG = new T.BufferGeometry(); axG.setAttribute('position', new T.Float32BufferAttribute(ax, 3));
+    var axes = new T.LineSegments(axG, axMat); axes.renderOrder = 1; scene.add(axes);
+    var bAxes = null;
+    if (bL) {
+      var bbx = bL.bounds, ba = [], bz = (function () { var r = bL.range(); return r[0]; })();
+      var q0 = W(bL, bbx.x0, bbx.y1, bz), q1 = W(bL, bbx.x1, bbx.y1, bz), q2 = W(bL, bbx.x0, bbx.y0, bz);
+      ba.push(q0.x, q0.y - 0.3, q0.z, q1.x, q1.y - 0.3, q1.z, q0.x, q0.y - 0.3, q0.z, q2.x, q2.y - 0.3, q2.z);
+      var bG = new T.BufferGeometry(); bG.setAttribute('position', new T.Float32BufferAttribute(ba, 3));
+      bAxes = new T.LineSegments(bG, axMat.clone()); scene.add(bAxes);
+    }
+
+    /* ---------- spin chapter: the centroid trail of each packet, drawn up to the current time ---------- */
+    var bTrails = [];
+    if (bL) {
+      [['meanUp', '--spin-up'], ['meanDown', '--spin-down']].forEach(function (cfg) {
+        var arr = BE.series[cfg[0]], n = arr.length, pos = new Float32Array(n * 6), idx = [], hw = 0.06;
+        for (var i = 0; i < n; i++) {
+          var a0 = arr[i], a1 = arr[Math.min(n - 1, i + 1)], am = arr[Math.max(0, i - 1)];
+          var pw = W(bL, a0[0], a0[1], bL.Eat('lower', a0[0], a0[1])); pw.y += 0.05;
+          var tx = a1[0] - am[0], ty = a1[1] - am[1], tl = Math.sqrt(tx * tx + ty * ty) || 1;
+          var nx = -ty / tl * hw, nz = tx / tl * hw;
+          pos[i * 6] = pw.x + nx; pos[i * 6 + 1] = pw.y; pos[i * 6 + 2] = pw.z + nz;
+          pos[i * 6 + 3] = pw.x - nx; pos[i * 6 + 4] = pw.y; pos[i * 6 + 5] = pw.z - nz;
+          if (i < n - 1) idx.push(2 * i, 2 * i + 1, 2 * i + 2, 2 * i + 1, 2 * i + 3, 2 * i + 2);
+        }
+        var g = new T.BufferGeometry(); g.setAttribute('position', new T.BufferAttribute(pos, 3)); g.setIndex(idx);
+        var m = new T.Mesh(g, new T.MeshBasicMaterial({ color: C(cfg[1]), transparent: true, opacity: 0, depthWrite: false, side: T.DoubleSide }));
+        m.renderOrder = 6; m.frustumCulled = false; m.visible = false; scene.add(m); bTrails.push(m);
+      });
+    }
+
+    /* ---------- DOM labels & bubbles ---------- */
+    var overlay = $('overlay');
+    function richText(el, s) { /* "Q_tuning" -> Q<sub>tuning</sub>, built without innerHTML */
+      var m = /^(.*?)_(\{?)([^}]*)\}?$/.exec(String(s));
+      if (!m) { el.textContent = s; return; }
+      el.appendChild(document.createTextNode(m[1]));
+      var sub = document.createElement('sub'); sub.textContent = m[3]; el.appendChild(sub);
+    }
+    var labels = [];
+    /* opt.group: labels shown all together or not at all (an axis with its ticks); opt.avoid: fade near the packet */
+    function label(text, cls, pos, vis, opt) {
+      var d = document.createElement('div'); d.className = 'lbl3d ' + (cls || '');
+      var s = document.createElement('span'); richText(s, text); d.appendChild(s);
+      overlay.appendChild(d); var L = { el: d, pos: pos, vis: vis, shown: -1, group: opt && opt.group, avoid: opt && opt.avoid }; labels.push(L); return L;
+    }
+    var win = function (a, b, c, d) { return function (P) { return smooth(P, a, b) * (1 - smooth(P, c, d)); }; };
+    var labs = CI.labels || {};
+    var lx = W(ciL, (xA + xB) / 2, yFront, 0).add(V(0, -0.5, 0.4));
+    var ly = W(ciL, xA, (yA + yB) / 2, 0).add(V(-0.7, -0.4, 0));
+    var axWin = win(0.75, 1.0, 4.0, 4.2);
+    label(labs.x || 'Q_tuning', '', lx, axWin, { group: 'x' });
+    label(labs.y || 'Q_coupling', '', ly, axWin, { group: 'y' });
+    label('E / eV', '', W(ciL, xA, yFront, eTop).add(V(0, 0.45, 0)), axWin, { group: 'e' });
+    eTicks.forEach(function (tk) { label(String(tk[0]), 'tick', tk[1], axWin, { group: 'e' }); });
+    label(labs.upper || 'S₁', 'surf', W(ciL, fcv[0] - 0.12 * (xB - xA), fcv[1] + 0.3 * (yB - yA), ciL.Eat('upper', fcv[0] - 0.12 * (xB - xA), fcv[1] + 0.3 * (yB - yA))).add(V(0, 0.35, 0)), win(0.2, 0.6, 4.4, 4.9));
+    label(labs.lower || 'S₀', 'surf', W(ciL, prod[0], prod[1] + 0.3 * (yB - yA), ciL.Eat('lower', prod[0], prod[1] + 0.3 * (yB - yA))).add(V(0, 0.35, 0)), win(0.2, 0.6, 4.4, 4.9));
+    var hvLab = label('hν', 'hv', aBase.clone().add(V(-0.12, aLen * 0.5, 0)), win(1.08, 1.2, 2.05, 2.3));
+    /* marks sit just in front of (below) their point, so they never sit on the resting packet or the glint */
+    label('Franck–Condon', 'mark below', W(ciL, fc[0], fc[1] + 2.8 * ((CI.ground && CI.ground.sigmaY) || 0.71), ciL.Eat('lower', fc[0], fc[1] + 2.8 * ((CI.ground && CI.ground.sigmaY) || 0.71))), win(-1, 0, 0.7, 0.95));
+    label('conical intersection', 'mark below', W(ciL, ciP[0], ciP[1] + 0.9, ciL.Eat('lower', ciP[0], ciP[1] + 0.9)), win(2.5, 2.8, 3.1, 3.25));
+    label('radical-pair region', '', disc.position.clone().add(V(-0.2 * rp.r * ciL.sc, 0.05, 1.12 * rp.r * ciL.sc)), win(2.9, 3.2, 3.95, 4.1));
+    label('product well', 'mark', pPR.clone().add(V(0, 0.1, 0)), win(3.9, 4.2, 4.85, 5.0), { avoid: true });
+    if (bL) {
+      var bl = BE.labels || {}, bbo = bL.bounds;
+      var bx0 = bbo.x0 + 0.42 * (bbo.x1 - bbo.x0), by0 = bbo.y0 + 0.82 * (bbo.y1 - bbo.y0);
+      label(bl.upper || 'upper', 'surf', W(bL, bx0, by0, bL.Eat('upper', bx0, by0)).add(V(0, 0.35, 0)), win(5.15, 5.35, 5.85, 6.0));
+      label(bl.lower || 'lower', 'surf', W(bL, bx0, by0, bL.Eat('lower', bx0, by0)).add(V(0, 0.35, 0)), win(5.15, 5.35, 5.85, 6.0));
+      var bz2 = bL.range()[0];
+      /* coordinate names on the grid itself, on the side away from the text column */
+      var bLx = bbo.x1 - bbo.x0, bLy = bbo.y1 - bbo.y0;
+      label(bl.x || 'x', '', W(bL, bbo.x0 + 0.66 * bLx, bbo.y0 + 0.93 * bLy, bL.Eat('lower', bbo.x0 + 0.66 * bLx, bbo.y0 + 0.93 * bLy)).add(V(0, 0.15, 0)), win(5.15, 5.35, 5.85, 6.0));
+      label(bl.y || 'y', '', W(bL, bbo.x0 + 0.16 * bLx, bbo.y0 + 0.78 * bLy, bL.Eat('lower', bbo.x0 + 0.16 * bLx, bbo.y0 + 0.78 * bLy)).add(V(0, 0.15, 0)), win(5.15, 5.35, 5.85, 6.0));
+    }
+
+    function bubble() {
+      var d = document.createElement('div'); d.className = 'bubble';
+      var b = document.createElement('div'); b.className = 'b'; d.appendChild(b);
+      overlay.appendChild(d); return { el: d, b: b, text: null, side: null, shown: -1, bw: 0, dx: 0, okAt: 0, xy: null };
+    }
+    var bubA = bubble(), bubB = bubble();
+    /* opt.fixedSide: never flip (spin pair: up bubble left of its packet, down bubble right);
+       a bubble that is briefly blocked or off-screen keeps its last place for a moment instead of blinking */
+    function setBubble(B, html, side, pos, alpha, opt) {
+      opt = opt || {};
+      var tkey = html && typeof html === 'object' ? html.cls + html.mark + html.text : (html || '');
+      if (B.text !== tkey) {
+        B.text = tkey; B.b.textContent = ''; B.bw = 0;
+        if (html && typeof html === 'object') {
+          var sp = document.createElement('span'); sp.className = 'spin ' + html.cls; sp.textContent = html.mark; B.b.appendChild(sp);
+          B.b.appendChild(document.createTextNode(html.text));
+        } else B.b.textContent = html || '';
+      }
+      var sxy = pos ? project(pos) : null, now = performance.now();
+      if (sxy && (blocked(sxy) || sxy[1] - 50 < mastBottom)) sxy = null;      /* the box sits ~50 px above its anchor: keep it below the top links */
+      if (!html || !(alpha > 0.001)) { sxy = null; B.okAt = 0; }
+      if (!sxy && B.okAt && now - B.okAt < 220 && B.xy) { sxy = B.xy; }      /* grace period */
+      else if (sxy) B.okAt = now;
+      var a = sxy && html ? alpha : 0;
+      if (sxy) {
+        if (!B.bw) B.bw = B.b.offsetWidth || 160;
+        var bw = B.bw, padR = Wpx >= 720 ? 56 : 16;
+        var over = function (sd) { var l = sd === 'l' ? sxy[0] + 12 - bw : sxy[0] - 12; return Math.max(0, 16 - l) + Math.max(0, l + bw - (Wpx - padR)); };
+        if (!opt.fixedSide && over(side) > 0) { var o2 = side === 'l' ? 'r' : 'l'; if (over(o2) < over(side)) side = o2; }
+        if (B.side !== side) { B.side = side; B.el.classList.toggle('l', side === 'l'); }
+        /* still too wide for the screen: slide the box in and move the tail back so it keeps pointing at the packet */
+        var left = side === 'l' ? sxy[0] + 12 - bw : sxy[0] - 12, dx = 0;
+        if (left < 16) dx = 16 - left; else if (left + bw > Wpx - padR) dx = Wpx - padR - left - bw;
+        dx = clamp(dx, -(bw - 34), bw - 34);
+        if (Math.abs(dx - B.dx) > 0.5) { B.dx = dx; B.b.style.translate = dx ? dx.toFixed(1) + 'px 0' : ''; B.b.style.setProperty('--tail', (-dx).toFixed(1) + 'px'); }
+        B.el.style.transform = 'translate3d(' + sxy[0].toFixed(1) + 'px,' + sxy[1].toFixed(1) + 'px,0)';
+      }
+      B.xy = sxy;
+      if (Math.abs(a - B.shown) > 0.01) { B.shown = a; B.el.style.opacity = a.toFixed(2); }
+    }
+
+    /* ---------- bloom ---------- */
+    var composer = null, bloom = null;
+    try {
+      if (T.EffectComposer && T.RenderPass && T.UnrealBloomPass) {
+        composer = new T.EffectComposer(renderer);
+        composer.addPass(new T.RenderPass(scene, camera));
+        bloom = new T.UnrealBloomPass(new T.Vector2(256, 256), 0.5, 0.32, 0.76);
+        composer.addPass(bloom);
+      }
+    } catch (e) { composer = null; console.info('[wavepacket] bloom unavailable', e); }
+
+    /* ---------- camera path: [P, eye, look] in story units ---------- */
+    function add(a, x, y, z) { return a.clone().add(V(x, y, z)); }
+    function mixv(a, b, t) { return a.clone().lerp(b, t); }
+    function orbit(target, az, el, dist) { /* az: degrees toward -x from the +z (front) axis; el: degrees above horizon */
+      var a = az * Math.PI / 180, e = el * Math.PI / 180;
+      return target.clone().add(V(-Math.sin(a) * Math.cos(e) * dist, Math.sin(e) * dist, Math.cos(a) * Math.cos(e) * dist));
+    }
+    function key(P, target, az, el, dist) { return [P, orbit(target, az, el, dist), target.clone()]; }
+    var KEYS = [
+      key(0.00, add(C0, -2.2, 0.2, 0), 12, 30, 31),
+      key(0.80, add(pFC, 2.6, 1.4, 0), -6, 27, 19),
+      key(1.15, add(pFC, 1.2, 2.3, 0), -8, 15, 17),
+      key(1.80, add(pFC, 1.6, 2.5, 0), -12, 18, 17),
+      key(2.15, mixv(pFCv, pCI, 0.35), 4, 24, 19),
+      key(2.75, mixv(pFCv, pCI, 0.7), 10, 24, 17),
+      key(3.10, add(pCI, 0.5, 0.3, 0), 16, 22, 13),
+      key(3.75, add(pCI, 1.5, 0, 0), 8, 28, 14),
+      /* chapter 4: swing round behind the far wall of the product well and look back, so the two lobes split
+         left and right in front of the camera and the reactant well lies beyond them */
+      key(4.06, mixv(pCI, pFar, 0.5), -45, 34, 20),
+      key(4.24, add(pFar, -0.9, 0.3, 0), -84, 39, 18),
+      key(4.44, add(pFar, -1.8, 0.3, 0), -88, 40, 20),
+      key(4.64, mixv(pFar, pCI, 0.55), -58, 40, 26),
+      key(4.86, add(C0, -1, 0.2, 0), -6, 36, 30),
+      key(5.08, mixv(C0, pB, 0.6), -10, 40, 28),
+      key(5.26, add(pBpath, 0.5, 0, 0), 88, 50, 21),
+      key(5.88, add(pBpath, 3.6, -0.3, 0), 90, 52, 22),
+      key(6.25, MID.clone(), 6, 30, 40),
+      key(7.40, MID.clone(), 12, 27, 38),
+      key(8.25, add(pCI, 0, 0, -1), 20, 26, 27),
+      key(9.00, add(pCI, 0, 0, -1), 23, 27, 29)
+    ];
+    function cr(a, b, c, d, u) { var u2 = u * u, u3 = u2 * u; return 0.5 * ((2 * b) + (-a + c) * u + (2 * a - 5 * b + 4 * c - d) * u2 + (-a + 3 * b - 3 * c + d) * u3); }
+    var eye = V(0, 0, 0), look = V(0, 0, 0);
+    function samplePath(P, linear) {
+      var n = KEYS.length, i = 0; while (i < n - 2 && P > KEYS[i + 1][0]) i++;
+      var k0 = KEYS[Math.max(0, i - 1)], k1 = KEYS[i], k2 = KEYS[i + 1], k3 = KEYS[Math.min(n - 1, i + 2)];
+      var u = clamp((P - k1[0]) / (k2[0] - k1[0]), 0, 1);
+      ['x', 'y', 'z'].forEach(function (ax) {
+        eye[ax] = linear ? lerp(k1[1][ax], k2[1][ax], u) : cr(k0[1][ax], k1[1][ax], k2[1][ax], k3[1][ax], u);
+        look[ax] = linear ? lerp(k1[2][ax], k2[2][ax], u) : cr(k0[2][ax], k1[2][ax], k2[2][ax], k3[2][ax], u);
+      });
+    }
+
+    /* ---------- sizing ---------- */
+    var Wpx = 1, Hpx = 1;
+    /* portrait layout: top of each chapter's fixed copy block and bottom of the masthead links, measured on resize */
+    var copyEls = Array.prototype.slice.call(document.querySelectorAll('#story > .chapter .copy')), copyTops = [], mastBottom = 60;
+    function measureBand() {
+      var q = document.querySelector('.masthead .quick'); mastBottom = q ? q.getBoundingClientRect().bottom + 6 : 60;
+      copyTops = copyEls.map(function (el) {
+        var cs = getComputedStyle(el);
+        return cs.position === 'fixed' ? Hpx - (parseFloat(cs.bottom) || 0) - el.offsetHeight : Hpx * 0.6;
+      });
+    }
+    function freeBand(P) {
+      var n = copyTops.length; if (!n) return [mastBottom, Hpx * 0.6];
+      var c = clamp(Math.floor(P), 0, n - 1), f = c < n - 1 ? smooth(P - c, 0.86, 1.0) : 0;
+      return [mastBottom, lerp(copyTops[c], copyTops[Math.min(n - 1, c + 1)], f) - 10];
+    }
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { measureBand(); lastKey = ''; bubA.bw = bubB.bw = 0; });
+    function resize() {
+      Wpx = window.innerWidth; Hpx = window.innerHeight;
+      measureBand();
+      renderer.setSize(Wpx, Hpx, false);
+      camera.aspect = Wpx / Hpx;
+      camera.fov = camera.aspect < 0.8 ? 46 : 36;
+      camera.updateProjectionMatrix();
+      if (composer) { composer.setPixelRatio ? composer.setPixelRatio(PR) : 0; composer.setSize(Wpx, Hpx); }
+      if (bloom) bloom.resolution.set(Wpx, Hpx);
+      lastKey = ''; bubA.bw = bubB.bw = 0; labels.forEach(function (L) { L.w = 0; });
+    }
+    var _v = V(0, 0, 0), _c = V(0, 0, 0);
+    var avoid = null; /* screen rect of the copy block currently on screen */
+    var hudRect = null, hudEl = $('hud');
+    function inRect(r, xy, m) { return r && xy[0] > r.left - m && xy[0] < r.right + m && xy[1] > r.top - m - 4 && xy[1] < r.bottom + m; }
+    function blocked(xy) {
+      /* landscape layouts: the picture sits right of the copy, so keep the whole text column clear, not just the copy block */
+      if (avoid && Wpx >= Hpx && avoid.right - avoid.left < 0.6 * Wpx && xy[0] < avoid.right + 16 && xy[1] < avoid.bottom + 12) return true;
+      return inRect(avoid, xy, 12) || inRect(hudRect, xy, 24);
+    }
+    function project(p) {
+      _c.copy(p).applyMatrix4(camera.matrixWorldInverse);
+      if (_c.z > -0.1) return null;
+      _v.copy(p).project(camera);
+      var x = (_v.x * 0.5 + 0.5) * Wpx, y = (-_v.y * 0.5 + 0.5) * Hpx;
+      if (x < 40 || x > Wpx - 64 || y < 64 || y > Hpx - 20) return null;
+      return [x, y];
+    }
+
+    /* ---------- per-frame update ---------- */
+    var lastKey = '', tmp = V(0, 0, 0), pk2 = V(0, 0, 0);
+    function packetCI(s) {
+      /* centroid of the packet that the story follows, on its own surface */
+      var up = at2(ts, SE.meanUpper, s.t), lo = at2(ts, SE.meanLower, s.t);
+      var pu = at1(ts, SE.popUpper, s.t);
+      if (s.phase !== 'run') return mixv(pFC, pFCv, s.e);
+      return pu >= 0.5 ? W(ciL, up[0], up[1], ciL.Eat('upper', up[0], up[1])) : W(ciL, lo[0], lo[1], ciL.Eat('lower', lo[0], lo[1]));
+    }
+    ciL.moundH('upper', 0.75); ciL.moundI('upper', 0.74);         /* S1 packet: a softer, semi-transparent hill */
+    var pick = { bye: 0, see: 2 };                                  /* which lobe each chapter-4 bubble follows */
+    function update(s, now, reduce, dt) {
+      var P = s.P;
+      timeU.value = reduce ? 0 : now;
+      /* --- densities --- */
+      var breath = (reduce || P >= 1) ? 1 : 0.86 + 0.14 * Math.sin(now * 1.6);
+      if (s.phase === 'ground') { ciL.setCustom('ground', ground, null); ciL.gains('lower', breath, 0); ciL.gains('upper', 0, 0); }
+      else if (s.phase === 'excite') { ciL.setCustom('excite', ground, upper0); ciL.gains('lower', 1 - s.e, 0); ciL.gains('upper', s.e, 0); }
+      else {
+        ciL.setFrame(s.t);
+        var dimCI = 1 - 0.35 * smooth(P, 5.0, 5.4) + 0.35 * smooth(P, 7.6, 8.4);
+        /* late in the run the hot S0 packet spreads thin; rescale each frame to its own peak so it stays visible
+           (the About note lists this as illustrative) */
+        var gL = 1;
+        if (P >= 4) gL = lerp(1, Math.min(2.4, 1 / ciL.peak('lower', s.t)), smooth(s.t, tB + 10, tB + 40));
+        ciL.gains('lower', dimCI * gL, dimCI); ciL.gains('upper', dimCI, 0);
+      }
+      /* S1 sheet steps back while the story is on S0 (chapter 4), and returns for the overview */
+      ciL.opacity('upper', 1 - 0.72 * smooth(P, 3.95, 4.12) * (1 - smooth(P, 4.85, 5.05)));
+      if (bL) {
+        bL.setFrame(s.tb); var gb = smooth(P, 4.7, 5.2); bL.gains('lower', gb, gb); bL.gains('upper', gb, gb);
+        bL.opacity('upper', 0.6);
+        var trA = 0.85 * smooth(P, 5.24, 5.36) * (1 - smooth(P, 5.85, 6.1)), nTr = Math.max(0, Math.round((s.tb - bt0) / ((btEnd - bt0) || 1) * (bts.length - 1)));
+        bTrails.forEach(function (m) { m.visible = trA > 0.01 && nTr > 1; m.material.opacity = trA; m.geometry.setDrawRange(0, 6 * nTr); });
+      }
+      /* --- props --- */
+      var aA = P < 1 ? 0 : 1 - smooth(P, 2.0, 2.35);
+      arrow.visible = aA > 0.01 && s.arrow > 0.01;
+      arrowMat.opacity = aA;
+      var aL = Math.max(0.05, s.arrow * aLen);
+      shaft.scale.set(1, Math.max(0.01, aL - 0.4), 1); head.position.set(0, aL, 0); head.scale.setScalar(Math.min(1, aL / 0.45));
+      photonGlow.visible = arrow.visible && s.arrow < 1;
+      photonGlow.position.copy(aBase).add(V(0, aL, 0)); photonGlow.material.opacity = 0.9 * aA;
+      disc.material.uniforms.uA.value = 0.55 * (smooth(P, 2.7, 3.05) * (1 - smooth(P, 4.0, 4.3))) + 0.3 * smooth(P, 7.6, 8.3);
+      var pulse = reduce ? 1 : 0.8 + 0.2 * Math.sin(now * 2.2);
+      ciGlow.material.opacity = (0.6 * smooth(P, 2.75, 3.1) * (1 - smooth(P, 3.9, 4.3)) + 0.9 * smooth(P, 7.6, 8.4)) * pulse;
+      ciGlow.visible = ciGlow.material.opacity > 0.01;
+      ciGlow.scale.setScalar(2.2 + 1.4 * smooth(P, 7.6, 8.4));
+      axMat.opacity = 0.45 * smooth(P, 0.75, 1.0) * (1 - smooth(P, 4.0, 4.2));
+      if (bAxes) bAxes.material.opacity = 0.45 * smooth(P, 5.1, 5.35) * (1 - smooth(P, 5.85, 6.1));
+
+      /* --- camera --- */
+      samplePath(P, reduce);
+      var fw = 0.3 * smooth(P, 1.95, 2.2) * (1 - smooth(P, 3.85, 4.1));
+      if (fw > 0) look.lerp(packetCI(s), fw);
+      /* late chapter 4: the hot S0 packet sloshes across the whole landscape, so drift along with its time-averaged centroid */
+      var wF = smooth(P, 4.5, 4.66) * (1 - smooth(P, 4.86, 4.98));
+      if (wF > 0) {
+        var mx = 0, my = 0;
+        for (var k = -4; k <= 4; k++) { var q = at2(ts, SE.meanLower, clamp(s.t + k * 3, t0, tEnd)); mx += q[0] / 9; my += q[1] / 9; }
+        var sh = W(ciL, mx, my, ciL.Eat('lower', mx, my)).sub(look).multiplyScalar(0.85 * wF);
+        eye.add(sh); look.add(sh);
+      }
+      /* spin chapter: follow the pair along x, so they stay mid-frame while they drift apart in y */
+      var w5 = bL ? smooth(P, 5.2, 5.34) * (1 - smooth(P, 5.85, 6.0)) : 0;
+      if (w5 > 0) {
+        var bu = at2(bts, BE.series.meanUp, s.tb), bd = at2(bts, BE.series.meanDown, s.tb), bmx = (bu[0] + bd[0]) / 2;
+        var sh5 = W(bL, bmx, 0, bL.Eat('lower', bmx, 0)).sub(look); sh5.y = 0; sh5.multiplyScalar(0.6 * w5);
+        eye.add(sh5); look.add(sh5);
+      }
+      var asp = Wpx / Hpx, reading = smooth(P, 5.75, 6.2), dk, oy = 0;
+      if (asp < 1) {
+        /* portrait: the copy stacks low, so aim the picture at the free band between the masthead and the copy,
+           and pull back when that band is short (long chapters) */
+        var band = freeBand(P), bh = Math.max(80, band[1] - band[0]), dk0 = clamp(0.7 / asp, 1, 1.75);
+        var rest = 1 - smooth(P, 0.6, 1.0);                         /* landing view: a little closer and lower */
+        dk = lerp(dk0 * clamp(0.45 * Hpx / bh, 1, 1.35), dk0, reading) * (1 - 0.1 * rest);
+        oy = lerp(Hpx / 2 - (band[0] + band[1]) / 2, Hpx * 0.03, reading) - 0.1 * bh * rest;
+      } else { dk = asp < 1.3 ? 1.12 : 1; oy = Hpx * 0.06 * w5; }
+      if (dk !== 1) eye.sub(look).multiplyScalar(dk).add(look);
+      camera.position.copy(eye); camera.lookAt(look); dome.position.copy(eye);
+      /* shift the picture away from the copy: right on wide screens, up on phones */
+      var w4 = smooth(P, 4.05, 4.2) * (1 - smooth(P, 4.5, 4.7));
+      var ox = asp >= 1 ? -Wpx * ((Wpx > 900 ? 0.14 : 0.1) + 0.04 * w4 + 0.05 * smooth(P, 4.9, 5.2) * (1 - reading) + 0.08 * reading) : 0;
+      camera.setViewOffset(Wpx, Hpx, ox, oy, Wpx, Hpx);
+      camera.updateMatrixWorld();
+      var dist = eye.distanceTo(look);
+      ciL.setFog(dist * 1.2, dist * 3.4); if (bL) bL.setFog(dist * 1.2, dist * 3.4);
+      /* steeper views flatten the relief: lean on the contour lines a little more */
+      var elev = Math.asin(clamp((eye.y - look.y) / Math.max(1e-3, dist), -1, 1)) * 180 / Math.PI;
+      ciL.lineK('lower', 0.3 + 0.16 * smooth(elev, 38, 55));
+
+      /* --- labels --- */
+      /* screen rect of the narrative copy on screen (the union of this chapter's and the next one's while they cross-fade) */
+      var cP = Story.P(), c0 = Math.min(5, Math.floor(cP)); avoid = null;
+      for (var ci_ = c0; ci_ <= Math.min(5, c0 + 1); ci_++) {
+        var cc = copyEls[ci_];
+        if (!cc || getComputedStyle(cc).position !== 'fixed' || !(+cc.style.opacity > 0.05)) continue;
+        var rr = cc.getBoundingClientRect();
+        avoid = avoid ? { left: Math.min(avoid.left, rr.left), right: Math.max(avoid.right, rr.right), top: Math.min(avoid.top, rr.top), bottom: Math.max(avoid.bottom, rr.bottom) } : rr;
+      }
+      var hs = getComputedStyle(hudEl);  /* position: fixed, so offsetParent is always null: test the computed style */
+      hudRect = !hudEl.hidden && hs.display !== 'none' && hs.visibility !== 'hidden' && +hs.opacity > 0.05 ? hudEl.getBoundingClientRect() : null;
+      /* --- bubbles --- */
+      var c = Math.min(8, Math.floor(P)), u = P - c, fade = smooth(u, 0.04, 0.12) * (1 - smooth(u, 0.9, 0.97));
+      if (c === 0) fade = 1 - smooth(u, 0.9, 0.97);
+      if (c === 0) { setBubble(bubA, 'zzz… ground state', 'r', add(pFC, 0, 0.5 + 0.5 * breath, 0), fade); setBubble(bubB, null, 'r', null, 0); }
+      else if (c === 1) { setBubble(bubA, s.arrow > 0.3 ? 'hν! I’m excited!' : 'zzz…', 'r', mixv(pFC, pFCv, s.e).add(V(0, 0.9, 0)), fade); setBubble(bubB, null, 'r', null, 0); }
+      else if (c === 2) { setBubble(bubA, 'Where am I going?', 'r', packetCI(s).add(V(0, 1.0, 0)), fade); setBubble(bubB, null, 'r', null, 0); }
+      else if (c === 3) { setBubble(bubA, 'Aha! A conical intersection!', 'r', packetCI(s).add(V(0, 0.95, 0)), fade); setBubble(bubB, null, 'r', null, 0); }
+      else if (c === 4) {
+        /* each bubble rides on one lobe (split by the sign of Q_coupling), switching only when the other is clearly heavier */
+        var lb = ciL.lobes('lower', s.t, ciP[0]), tot = lb ? lb[0].w + lb[1].w + lb[2].w + lb[3].w : 0;
+        if (lb && tot > 0) {
+          if (lb[1 - pick.bye].w > 1.25 * lb[pick.bye].w) pick.bye = 1 - pick.bye;
+          if (lb[5 - pick.see].w > 1.25 * lb[pick.see].w) pick.see = 5 - pick.see;
+          var rb = lb[pick.bye], pr = lb[pick.see];
+          setBubble(bubA, 'Bye…', 'l', (lb[0].w + lb[1].w) / tot > 0.08 ? W(ciL, rb.x, rb.y, ciL.Eat('lower', rb.x, rb.y)).add(V(0, 0.75, 0)) : null, fade);
+          setBubble(bubB, 'See you in the product well', 'r', (lb[2].w + lb[3].w) / tot > 0.08 ? W(ciL, pr.x, pr.y, ciL.Eat('lower', pr.x, pr.y)).add(V(0, 0.75, 0)) : null, fade);
+        } else { setBubble(bubA, null, 'r', null, 0); setBubble(bubB, null, 'r', null, 0); }
+      } else if (c === 5 && bL) {
+        var fb = fade * smooth(u, 0.26, 0.34);
+        var mu = at2(bts, BE.series.meanUp, s.tb), md = at2(bts, BE.series.meanDown, s.tb);
+        var sfU = (BE.frames.surfaceOf && BE.frames.surfaceOf.spinUp) || 'lower', sfD = (BE.frames.surfaceOf && BE.frames.surfaceOf.spinDown) || 'lower';
+        /* which screen side each packet drifts to depends on the camera; put each bubble on its packet's outer side */
+        var su = project(W(bL, mu[0], mu[1], 0)), sd = project(W(bL, md[0], md[1], 0));
+        var upLeft = !(su && sd) || su[0] <= sd[0];
+        setBubble(bubA, { cls: 'up', mark: '↑', text: 'I have a SOC ticket!' }, upLeft ? 'l' : 'r', W(bL, mu[0], mu[1], bL.Eat(sfU, mu[0], mu[1])).add(V(0, 0.7 + 0.9 * (1 - smooth(Math.abs(mu[1] - md[1]), 1.5, 3.5)), 0)), fb, { fixedSide: Wpx < 720 });
+        setBubble(bubB, { cls: 'down', mark: '↓', text: 'Which way?' }, upLeft ? 'r' : 'l', W(bL, md[0], md[1], bL.Eat(sfD, md[0], md[1])).add(V(0, 0.7, 0)), fb, { fixedSide: Wpx < 720 });
+      } else { setBubble(bubA, null, 'r', null, 0); setBubble(bubB, null, 'r', null, 0); }
+
+      /* two bubbles on top of each other (phones, early spin chapter): lift the first one clear */
+      if (bubA.shown > 0.01 && bubB.shown > 0.01 && bubA.xy && bubB.xy) {
+        var ra = bubA.b.getBoundingClientRect(), rb2 = bubB.b.getBoundingClientRect();
+        if (ra.left < rb2.right + 4 && rb2.left < ra.right + 4 && ra.top < rb2.bottom + 4 && rb2.top < ra.bottom + 4) {
+          var lift2 = ra.bottom - rb2.top + 8;
+          bubA.el.style.transform = 'translate3d(' + bubA.xy[0].toFixed(1) + 'px,' + (bubA.xy[1] - lift2).toFixed(1) + 'px,0)';
+        }
+      }
+
+      /* labels after the bubbles, so a label never sits under one */
+      var bubRects = [bubA, bubB].filter(function (B) { return B.shown > 0.05; }).map(function (B) { return B.b.getBoundingClientRect(); });
+      var pkXY = s.phase === 'run' && P < 5 ? project(packetCI(s)) : null, gOff = {};
+      var la = [], lxy = [];
+      for (var i = 0; i < labels.length; i++) {
+        var L = labels[i], a = clamp(L.vis(P), 0, 1), xy = a > 0.01 ? project(L.pos) : null;
+        if (!xy || blocked(xy)) a = 0;
+        if (xy && L.avoid && pkXY) a *= smooth(Math.hypot(xy[0] - pkXY[0], xy[1] - pkXY[1]), 50, 90);
+        if (xy && a > 0) {                                     /* fully on screen, and not under a speech bubble */
+          if (!L.w) L.w = L.el.firstChild.offsetWidth || 80;
+          if (xy[0] - L.w / 2 < 8 || xy[0] + L.w / 2 > Wpx - (Wpx >= 720 ? 52 : 8)) a = 0;   /* clear of the rail */
+          for (var bi = 0; bi < bubRects.length && a > 0; bi++) { var br = bubRects[bi]; if (xy[0] + L.w / 2 > br.left - 6 && xy[0] - L.w / 2 < br.right + 6 && xy[1] > br.top - 12 && xy[1] < br.bottom + 12) a = 0; }
+        }
+        if (L.group && L.vis(P) > 0.01 && a === 0) gOff[L.group] = true;
+        la.push(a); lxy.push(xy);
+      }
+      for (i = 0; i < labels.length; i++) {
+        L = labels[i]; a = L.group && gOff[L.group] ? 0 : la[i];
+        if (lxy[i]) L.el.style.transform = 'translate3d(' + lxy[i][0].toFixed(1) + 'px,' + lxy[i][1].toFixed(1) + 'px,0)';
+        if (Math.abs(a - L.shown) > 0.01) { L.shown = a; L.el.style.opacity = a.toFixed(2); }
+      }
+
+      /* --- render --- */
+      if (composer) composer.render(); else renderer.render(scene, camera);
+
+      /* ambient animation wanted? (breathing at rest, coherence shimmer, CI pulse) */
+      var cohOn = s.phase === 'run' && P > 2.6 && P < 4.6;
+      return P < 1 || cohOn || (P > 2.7 && P < 4.3);
+    }
+
+    canvas.addEventListener('webglcontextlost', function (ev) { ev.preventDefault(); staticBackdrop('WebGL context lost'); });
+    resize();
+    return { update: update, resize: resize };
+  }
+})();
+</script>
+
+</body>
+</html>
