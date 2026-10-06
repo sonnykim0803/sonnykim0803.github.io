@@ -6,6 +6,7 @@
 <meta name="description" content="So Yeon Kim, Ph.D. candidate at KAIST. Nonadiabatic dynamics, electronic coherence near conical intersections, and Berry phase effects.">
 <meta name="color-scheme" content="dark">
 <title>So Yeon Kim</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23071020'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%23ff9a4c'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,400..800;1,62..125,400..800&family=JetBrains+Mono:wght@400;500&family=Source+Serif+4:ital,opsz,wght@0,8..60,300..600;1,8..60,300..600&display=swap">
@@ -40,6 +41,7 @@
   --cyan-haze:rgba(122,216,246,.16);
   --glow-haze:rgba(255,154,76,.24);
   --focus:#ffc48f;
+  --select:#d3dae4;       /* text selection: light grey */
 
   --font-display:"Archivo","Arial Narrow",Arial,sans-serif;
   --font-body:"Source Serif 4",Georgia,"Times New Roman",serif;
@@ -62,7 +64,7 @@ body{margin:0;background:var(--ink);color:var(--pearl);font-family:var(--font-bo
 a{color:inherit;text-decoration-color:var(--faint);text-underline-offset:.18em;text-decoration-thickness:1px}
 a:hover{text-decoration-color:var(--glow)}
 :focus-visible{outline:2px solid var(--focus);outline-offset:3px;border-radius:2px}
-::selection{background:var(--glow);color:var(--ink)}
+::selection{background:var(--select);color:var(--ink)}
 sub,sup{font-size:.68em;line-height:0}
 
 /* ---------- fixed layers ---------- */
@@ -90,6 +92,10 @@ sub,sup{font-size:.68em;line-height:0}
   letter-spacing:.02em}
 .quick a{text-decoration:none;color:var(--mist);padding:4px 0;border-bottom:1px solid transparent}
 .quick a:hover,.quick a[aria-current="true"]{color:var(--pearl);border-bottom-color:var(--glow)}
+/* Travels and LaTex for CBNU are separate pages: a hairline sets them apart from the in-page links */
+.quick a[data-go] + a.page{position:relative;margin-left:10px}
+.quick a[data-go] + a.page::before{content:"";position:absolute;left:-14px;top:50%;width:1px;height:.95em;
+  transform:translateY(-50%);background:var(--line)}
 
 /* ---------- chapter rail ---------- */
 .rail{position:fixed;right:clamp(10px,1.6vw,26px);top:50%;transform:translateY(-50%);z-index:7}
@@ -146,11 +152,18 @@ sub,sup{font-size:.68em;line-height:0}
   letter-spacing:-.012em;line-height:1.02;margin:0 0 1.1rem;text-wrap:balance;color:var(--pearl)}
 .copy h2,.panel h2{font-size:var(--s2)}
 .copy h1.name{font-size:var(--s3);font-weight:800;letter-spacing:-.025em;line-height:.92;margin-bottom:1.1rem}
+/* the name stays on one line: it is about 5.2 em wide, so it shrinks with its column when the column is narrow */
+@supports (font-size:1cqi){
+  #top .copy{container-type:inline-size}
+  .copy h1.name{white-space:nowrap;font-size:min(var(--s3),18.6cqi)}
+}
 .copy p{margin:0 0 .9rem;max-width:34rem;text-wrap:pretty}
 .role{font-family:var(--font-display);font-size:var(--s1);font-weight:600;font-stretch:87.5%;line-height:1.25;
   color:var(--pearl)}
 .role span{display:block;font-weight:400;font-stretch:100%;font-size:.78em;color:var(--mist);margin-top:.15rem}
-.tagline{font-style:italic;font-size:var(--s1);color:var(--pearl);line-height:1.35}
+.copy .tagline{font-style:italic;font-size:clamp(1.35rem,1.1rem + 1.2vw,2.05rem);color:var(--pearl);line-height:1.3;text-wrap:balance}
+/* her own lead-in line before a quoted heading, as on her old site ("When I was a freshman," / "My next goal is") */
+.lead-in{font-style:italic;font-size:var(--s1);color:var(--mist);line-height:1.3;margin:0 0 .35rem!important}
 .hint{font-family:var(--font-mono);font-size:var(--s-1);letter-spacing:.1em;text-transform:uppercase;color:var(--mist);
   display:flex;align-items:center;gap:.8em;margin-top:2rem!important;white-space:nowrap}
 .hint::after{content:"";width:1px;height:28px;background:linear-gradient(var(--mist),transparent);
@@ -272,10 +285,13 @@ details.about details.about dl{margin-top:.9rem}
   .copy h2{margin-bottom:.8rem}
   .hint{margin-top:1.2rem!important}
   .rail{display:none}
-  .masthead{padding:calc(env(safe-area-inset-top,0px) + 12px) 16px 10px;gap:4px 14px}
+  .masthead{padding:calc(env(safe-area-inset-top,0px) + 12px) 16px 10px;gap:4px 12px}
   html[data-reading] .masthead{background:var(--ink)}
   .lbl3d.hv > span{transform:translate(-190%,-50%)}
-  .quick{gap:2px 14px;font-size:.8rem}
+  /* the links share the brand's line and wrap to a second, right-aligned line (Travels, LaTex for CBNU at 375 px) */
+  .quick{flex:1 1 0;min-width:0;justify-content:flex-end;gap:0 12px;font-size:.8rem}
+  .quick a[data-go] + a.page{margin-left:0}
+  .quick a[data-go] + a.page::before{display:none}
   .hud{left:0;right:0;bottom:0;width:auto;border-left:0;border-top:1px solid var(--line);background:var(--ink);border-radius:0;
     padding:8px 16px calc(env(safe-area-inset-bottom,0px) + 8px);display:grid;grid-template-columns:minmax(0,1fr) 92px;
     column-gap:12px;align-items:center;font-size:.68rem;line-height:1.45}
@@ -294,9 +310,15 @@ details.about details.about dl{margin-top:.9rem}
 @media (max-width:419px){
   .hint-more{display:none}
 }
+/* narrow phones (320-359 px): smaller links keep the masthead at two rows */
+@media (max-width:359px){
+  .quick{gap:0 10px;font-size:.74rem}
+  .brand{font-size:.98rem}
+}
 @media (max-height:520px) and (orientation:landscape){
   .js .copy{position:static;width:auto;max-width:40rem;opacity:1!important;transform:none!important;
     padding-block:16vh 8vh;padding-inline:var(--gx)}
+  .js #top .copy{padding-top:max(16vh,calc(var(--mast-h,0px) + 16px))}
   .veil{background:linear-gradient(90deg,var(--veil) 0%,var(--veil) 45%,transparent 75%)}
   .hud{display:none}
 }
@@ -308,6 +330,7 @@ details.about details.about dl{margin-top:.9rem}
    (short windows, enlarged text): the copy then flows with the page and can always be scrolled to */
 .js.flow-copy .copy{position:static;width:auto;max-width:40rem;opacity:1!important;transform:none!important;
   padding-block:14vh 8vh;padding-inline:var(--gx)}
+.js.flow-copy #top .copy{padding-top:max(14vh,calc(var(--mast-h,0px) + 16px))}
 .js.flow-copy .copy > *{text-shadow:0 0 14px var(--ink),0 1px 2px var(--ink)}
 .js.flow-copy .veil{background:linear-gradient(90deg,var(--veil) 0%,var(--veil) 45%,transparent 80%)}
 @media (max-width:719px){
@@ -328,11 +351,13 @@ details.about details.about dl{margin-top:.9rem}
 
 <header class="masthead" lang="en">
   <a class="brand" href="#top" data-go="0">So Yeon Kim</a>
-  <nav class="quick" aria-label="Quick links">
+  <nav class="quick" aria-label="Site">
     <a href="#descend" data-go="2">Research</a>
     <a href="#publications" data-go="6">Publications</a>
     <a href="#cv" data-go="7">CV</a>
     <a href="#contact" data-go="8">Contact</a>
+    <a class="page" href="travels.html">Travels</a>
+    <a class="page" href="latex-for-cbnu.html">LaTex for CBNU</a>
   </nav>
 </header>
 
@@ -373,9 +398,11 @@ details.about details.about dl{margin-top:.9rem}
   <section class="chapter" id="excite" data-ch="1" style="--len:1.9" aria-labelledby="h-excite">
     <div class="copy">
       <p class="eyebrow"><span class="hv">h&nu;</span>&nbsp;&middot; vertical excitation</p>
-      <h2 id="h-excite" tabindex="-1">Like an excited electron</h2>
-      <p>When I was a freshman, &ldquo;like an excited electron,&rdquo; I decided to become a scientist who actively enjoys physics and chemistry. That goal naturally sparked my interest in physical chemistry.</p>
-      <p>Now I am a Hamiltonian designer: I develop quantum chemical electronic structure methods to describe excited electrons.</p>
+      <p class="lead-in">When I was a freshman,</p>
+      <h2 id="h-excite" tabindex="-1">&ldquo;like an excited electron,&rdquo;</h2>
+      <p>I decided to become a scientist who actively enjoys physics and chemistry.</p>
+      <p>This goal naturally sparked my interest in physical chemistry.</p>
+      <p>As a result, I am now a Hamiltonian designer developing Quantum Chemistry methods (quantum chemical electronic structure methods) to describe excited electrons.</p>
       <p class="onscreen"><strong>On screen</strong> &middot; a photon lifts the resting packet straight up from S&#8320; to S&#8321; at the Franck&ndash;Condon point. The nuclei have not moved yet.</p>
     </div>
   </section>
@@ -452,9 +479,9 @@ details.about details.about dl{margin-top:.9rem}
       <h3>Education</h3>
       <ul class="rows">
         <li><span class="when">Mar. 2024 &ndash; Feb. 2028 (expected)</span>
-          <span class="what">Ph.D. in Chemistry, Korea Advanced Institute of Science and Technology (KAIST) <span class="sub">Advisor: Prof. Young Min Rhee</span></span></li>
+          <span class="what">Ph.D. in Chemistry, Korea Advanced Institute of Science and Technology (KAIST) <span class="sub">Advisor: <a href="http://singlet.kaist.ac.kr/" target="_blank" rel="noopener">Prof. Young Min Rhee</a></span></span></li>
         <li><span class="when">Mar. 2022 &ndash; Feb. 2024</span>
-          <span class="what">M.S. in Chemistry, Chungbuk National University (CBNU) <span class="sub">Advisor: Prof. Jae Woo Park</span></span></li>
+          <span class="what">M.S. in Chemistry, Chungbuk National University (CBNU) <span class="sub">Advisor: <a href="https://sites.google.com/view/cbnuqbc/home" target="_blank" rel="noopener">Prof. Jae Woo Park</a></span></span></li>
         <li><span class="when">Mar. 2017 &ndash; Feb. 2022</span>
           <span class="what">B.S. in Physics (double major: Chemistry), Chungbuk National University (CBNU) <span class="sub">Summa Cum Laude</span></span></li>
       </ul>
@@ -486,10 +513,13 @@ details.about details.about dl{margin-top:.9rem}
 
   <section class="reading" id="contact" data-ch="8" aria-labelledby="h-contact">
     <div class="panel">
-      <p class="eyebrow">Next goal</p>
-      <h2 id="h-contact" tabindex="-1">Like a conical intersection</h2>
-      <p class="lede">Like a conical intersection connecting two states, I aspire to become a researcher who connects spectroscopy and computational chemistry, supporting experimenters to deeply understand various chemical phenomena.</p>
-      <p>As always, I will commit to continuous growth for new goals and science. Please give me your cheer up! Thank you!</p>
+      <p class="eyebrow">Contact</p>
+      <p class="lead-in">My next goal is</p>
+      <h2 id="h-contact" tabindex="-1">&ldquo;like a conical intersection.&rdquo;</h2>
+      <p class="lede">Like a conical intersection connecting two states, I aspire to become a researcher who connects &lsquo;spectroscopy and computational chemistry&rsquo; for supporting experimenters to deeply understand various chemical phenomena.</p>
+      <p>As always, I will commit to continuous growth for new goals and &lsquo;science&rsquo;.</p>
+      <p>Please give me your cheer up!</p>
+      <p>Thank you!</p>
 
       <h3>Get in touch</h3>
       <div class="email">
@@ -503,7 +533,7 @@ details.about details.about dl{margin-top:.9rem}
         <li><span class="when">Group</span> <a href="http://singlet.kaist.ac.kr/" target="_blank" rel="noopener">Computational Photodynamics Research Lab (Prof. Young Min Rhee), KAIST</a></li>
         <li><span class="when">M.S. group</span> <a href="https://sites.google.com/view/cbnuqbc/home" target="_blank" rel="noopener">Prof. Jae Woo Park&rsquo;s group, CBNU</a></li>
         <li><span class="when">Instagram</span> <a href="https://instagram.com/last_day_0n_earth" target="_blank" rel="noopener">@last_day_0n_earth</a></li>
-        <li><span class="when">Old site</span> <span><a href="https://sites.google.com/view/sonny-kim/travels" target="_blank" rel="noopener">Travels</a> &middot; <a href="https://sites.google.com/view/sonny-kim/latex-for-cbnu" target="_blank" rel="noopener">LaTeX for CBNU</a></span></li>
+        <li><span class="when">More</span> <span><a href="travels.html">Travels</a> &middot; <a href="latex-for-cbnu.html">LaTex for CBNU</a></span></li>
       </ul>
 
       <details class="about" id="about-sim">
@@ -528,7 +558,7 @@ details.about details.about dl{margin-top:.9rem}
             <summary>Technical details</summary>
             <dl id="about-tech-dl">
               <dt>Method</dt>
-              <dd>Exact quantum dynamics: grid-based split-operator propagation with Strang splitting (exact 2&times;2 potential step, FFT kinetic step), starting from the ground vibrational Gaussian placed on S&#8321; (vertical excitation). Densities are projected onto the adiabatic states point by point. Norm and energy are conserved to better than 10<sup>&minus;5</sup>.</dd>
+              <dd>Exact quantum dynamics: grid-based split-operator propagation (exact 2&times;2 potential step, FFT kinetic step), starting from the ground vibrational Gaussian placed on S&#8321; (vertical excitation). Densities are projected onto the adiabatic states point by point. Norm and energy are conserved to better than 10<sup>&minus;5</sup>.</dd>
               <dt>Computed</dt>
               <dd>Every frame after t = 0, and the populations, |&rho;&#8321;&#8320;|, &langle;y&rangle; and centroids in the readout.</dd>
             </dl>
@@ -557,7 +587,8 @@ var Story = (function () {
   var copies = secs.map(function (s) { return s.classList.contains('chapter') ? s.querySelector('.copy') : null; });
   var lastNarr = 0; copies.forEach(function (c, i) { if (c) lastNarr = i; });
   var railBtns = Array.prototype.slice.call(document.querySelectorAll('.rail button'));
-  var quick = Array.prototype.slice.call(document.querySelectorAll('.quick a'));
+  var quick = Array.prototype.slice.call(document.querySelectorAll('.quick a[data-go]'));   /* in-page links only */
+  var mastLinks = document.querySelector('.masthead .quick');
   var scrim = document.getElementById('scrim'), veil = document.getElementById('veil');
   var tops = [], bounds = [], vh = 1, listeners = [], pending = false, lastC = -1;
 
@@ -570,11 +601,12 @@ var Story = (function () {
      (short window, enlarged text), switch every block to normal flow so nothing is cut off or unreachable */
   function checkFit() {
     root.classList.remove('flow-copy', 'tight-copy');
-    if (mqFlow.matches) return;
     var top = 0;
     Array.prototype.forEach.call(document.querySelectorAll('.masthead .brand, .masthead .quick'), function (el) {
       top = Math.max(top, el.getBoundingClientRect().bottom);
     });
+    root.style.setProperty('--mast-h', Math.ceil(top) + 'px');   /* flowing copy starts below the links */
+    if (mqFlow.matches) return;
     var h = window.innerHeight || 1;
     function bad() {
       return copies.some(function (c) {
@@ -640,13 +672,23 @@ var Story = (function () {
   }
   function schedule() { if (!pending) { pending = true; window.requestAnimationFrame(update); } }
 
-  function go(c) {
+  /* instant: jump without smooth scrolling and leave focus alone (deep links on first load) */
+  function go(c, instant) {
     measure();
     c = clamp(c | 0, 0, N - 1);
     var reading = secs[c].classList.contains('reading');
     var panel = reading ? secs[c].querySelector('.panel') : null;
-    var y = c === 0 ? 0 : panel ? panel.getBoundingClientRect().top + sy() - 72 : bounds[c] + 0.2 * vh;
+    /* panels start just below the top links (two lines of them on phones) */
+    var gap = mastLinks ? Math.max(72, mastLinks.getBoundingClientRect().bottom + 14) : 72;
+    var y = c === 0 ? 0 : panel ? panel.getBoundingClientRect().top + sy() - gap : bounds[c] + 0.2 * vh;
     if (reading && c === N - 1) y = Math.min(y, document.documentElement.scrollHeight - vh);
+    if (instant) {
+      /* behavior 'auto' follows the page's CSS scroll-behavior (smooth): switch that off for the jump */
+      root.style.scrollBehavior = 'auto';
+      window.scrollTo(0, Math.max(0, y));
+      root.style.scrollBehavior = '';
+      return;
+    }
     window.scrollTo({ top: Math.max(0, y), behavior: mqReduce.matches ? 'auto' : 'smooth' });
     var h = secs[c].querySelector('h1, h2');
     if (h) { try { h.focus({ preventScroll: true }); } catch (e) { /* older browsers */ } }
@@ -686,6 +728,29 @@ var Story = (function () {
   window.addEventListener('resize', function () { measure(); schedule(); });
   window.addEventListener('load', function () { measure(); schedule(); });
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { measure(); schedule(); });
+
+  /* deep links from the side pages (index.html#publications, #cv, #contact, #descend, or any chapter id): the
+     browser's own jump lands on the section's top edge, before the fonts have set the panel heights. Once the
+     fonts and the page have loaded, go there the way the top links do, unless the visitor has already scrolled. */
+  var hashCh = -1, moved = false;
+  (function () {
+    var id = '';
+    try { id = decodeURIComponent((location.hash || '').slice(1)); } catch (e) { id = ''; }
+    for (var i = 0; i < N && id; i++) if (secs[i].id === id) hashCh = i;
+  })();
+  if (hashCh > 0) {
+    var mark = function () { moved = true; };
+    ['wheel', 'touchstart', 'keydown', 'pointerdown'].forEach(function (t) {
+      window.addEventListener(t, mark, { passive: true, once: true });
+    });
+    var land = function () {
+      if (moved) return;
+      window.requestAnimationFrame(function () { if (!moved) { go(hashCh, true); schedule(); } });
+    };
+    var fontsReady = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
+    if (document.readyState === 'complete') fontsReady.then(land);
+    else window.addEventListener('load', function () { fontsReady.then(land); });
+  }
 
   return {
     P: P, go: go, measure: measure, ramp: ramp, smooth: smooth, clamp: clamp,

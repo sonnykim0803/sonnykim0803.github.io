@@ -1,0 +1,642 @@
+<!doctype html>
+<html lang="ko" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#071020">
+<title>LaTex for CBNU · So Yeon Kim</title>
+<meta name="description" content="LaTex for CBNU by So Yeon Kim: the download link and a 13-page preview of the sample thesis.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23071020'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%23ff9a4c'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,400..800;1,62..125,400..800&family=JetBrains+Mono:wght@400;500&family=Source+Serif+4:ital,opsz,wght@0,8..60,300..600;1,8..60,300..600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600&family=Noto+Serif+KR:wght@400;600&display=swap">
+<script>document.documentElement.classList.replace('no-js','js');</script>
+<style>
+/* LaTex for CBNU: the same night-blue world as the main page, without the landscape. The dedication sits as a
+   quiet blockquote beside the download link and the contact line; below, a page viewer flips through the
+   template's sample thesis one white A4 sheet at a time (prev/next, arrow keys, swipe, thumbnail strip),
+   and a native <dialog> shows the current page at full size. */
+:root{
+  color-scheme: dark;
+  --ink:#071020;          /* night-blue ground */
+  --ink-2:#0b1628;        /* reading panels */
+  --line:#1f314c;         /* hairlines */
+  --pearl:#e9eef5;        /* text, S1 sheet */
+  --mist:#93a7c0;         /* secondary text */
+  --faint:#62789a;        /* hairlines, dots, axis lines (not for text) */
+  --faint-text:#7d93b2;   /* tertiary text: >= 4.5:1 on ink, ink-2 and dusk */
+  --cyan:#7ad8f6;         /* S0 high energy */
+  --deep:#0b4a9c;         /* S0 wells */
+  --dusk:#172a4b;         /* horizon */
+  --glow:#ff9a4c;         /* the wavepacket */
+  --glow-core:#fff0dc;    /* hot centre of the packet */
+  --coh:#ffe1a6;          /* coherence shimmer */
+  --photon:#e8352d;       /* h-nu arrow */
+  --spin-up:#8f88ff;      /* spin up, blue-violet */
+  --spin-down:#ff9a4c;    /* spin down, orange */
+  --bubble:#fbfaf6;
+  --bubble-ink:#141b27;
+  --shadow:rgba(2,6,14,.45);
+  --veil:rgba(7,16,32,.86);
+  --hud-bg:rgba(7,16,32,.84);
+  --cyan-haze:rgba(122,216,246,.16);
+  --glow-haze:rgba(255,154,76,.24);
+  --focus:#ffc48f;
+  --select:#d3dae4;       /* text selection: light grey */
+
+  --font-display:"Archivo","Arial Narrow",Arial,sans-serif;
+  --font-body:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --font-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+
+  --s-1:clamp(.72rem,.69rem + .14vw,.8rem);
+  --s0:clamp(1rem,.95rem + .22vw,1.125rem);
+  --s1:clamp(1.15rem,1.04rem + .5vw,1.45rem);
+  --s2:clamp(1.95rem,1.3rem + 2.5vw,3.3rem);
+  --s3:clamp(3.1rem,1.6rem + 6.4vw,7rem);
+
+  --gx:clamp(16px,5.5vw,88px);
+
+  /* page-only tokens */
+  --font-body-ko:"Source Serif 4","Noto Serif KR","AppleMyungjo","Batang",Georgia,serif;
+  --font-ui-ko:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --font-mono-ko:"JetBrains Mono","Noto Sans KR",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --pearl-soft:#c9d4e2;   /* the dedication: quieter than body text, still >= 10:1 on ink */
+  --paper:#ffffff;        /* the template's A4 pages */
+  --paper-under:#dde2ea;  /* sheets stacked underneath */
+  --paper-under-2:#aeb8c6;
+  --desk-haze:rgba(122,216,246,.07);
+  --scrim:rgba(2,6,14,.82);
+  --btn-bg:rgba(11,22,40,.72);
+  --sheet-shadow-far:rgba(0,0,0,.75);
+  --sheet-shadow-near:rgba(0,0,0,.35);
+  --zoom-shadow:rgba(0,0,0,.6);
+  --zoom-img-shadow:rgba(0,0,0,.7);
+  --content-max:77rem;
+  --mast-h:88px;           /* sticky masthead + its fade: in-page jumps stop below it */
+}
+[hidden]{display:none!important}
+html{overflow-x:clip;background:var(--ink);scrollbar-gutter:stable;scroll-padding-top:var(--mast-h)}
+html:has(dialog[open]){overflow:hidden}
+body{margin:0;background:var(--ink);color:var(--pearl);font-family:var(--font-body-ko);font-size:var(--s0);
+  line-height:1.75;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;overflow-x:clip;
+  word-break:keep-all;overflow-wrap:break-word;
+  min-height:100vh;min-height:100svh;display:flex;flex-direction:column}
+a{color:inherit;text-decoration-color:var(--faint);text-underline-offset:.18em;text-decoration-thickness:1px}
+a:hover{text-decoration-color:var(--glow)}
+:focus-visible{outline:2px solid var(--focus);outline-offset:3px;border-radius:2px}
+::selection{background:var(--select);color:var(--ink)}
+.vh{position:absolute!important;width:1px;height:1px;margin:-1px;padding:0;border:0;overflow:hidden;
+  clip-path:inset(50%);white-space:nowrap}
+
+.backdrop{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(60% 40% at 24% 104%, var(--cyan-haze), transparent 70%),
+    linear-gradient(180deg, var(--ink) 0%, var(--ink) 40%, var(--dusk) 160%)}
+
+.skip{position:absolute;left:16px;top:-200px;z-index:20;background:var(--glow);color:var(--ink);
+  font:500 .78rem/1 var(--font-mono);letter-spacing:.08em;text-transform:uppercase;padding:10px 14px;
+  text-decoration:none;border-radius:2px}
+.skip:focus{top:calc(env(safe-area-inset-top,0px) + 10px)}
+
+/* ---------- masthead (same look as index.html; sticky on an ink ground) ---------- */
+.masthead{position:sticky;top:env(safe-area-inset-top,0px);z-index:8;display:flex;flex-wrap:wrap;align-items:baseline;
+  justify-content:space-between;gap:6px 20px;padding:18px var(--gx) 16px;background:var(--ink);line-height:1.6;
+  box-shadow:0 calc(-1 * env(safe-area-inset-top,0px)) 0 0 var(--ink)}
+.masthead::after{content:"";position:absolute;left:0;right:0;top:100%;height:22px;pointer-events:none;
+  background:linear-gradient(180deg,var(--ink) 0%,transparent 100%)}
+.brand{font-family:var(--font-display);font-style:italic;font-weight:700;font-stretch:87.5%;font-size:1.06rem;
+  letter-spacing:-.005em;text-decoration:none;color:var(--pearl)}
+.quick{display:flex;flex-wrap:wrap;gap:4px 18px;font-family:var(--font-display);font-weight:500;font-size:.84rem;
+  letter-spacing:.02em;line-height:1.6}
+.quick a{text-decoration:none;color:var(--mist);padding:4px 0;border-bottom:1px solid transparent}
+.quick a:hover,.quick a[aria-current="page"]{color:var(--pearl);border-bottom-color:var(--glow)}
+/* Travels and LaTex for CBNU are separate pages: a hairline sets them apart from the main-page links */
+.quick a:not(.page) + a.page{position:relative;margin-left:10px}
+.quick a:not(.page) + a.page::before{content:"";position:absolute;left:-14px;top:50%;width:1px;height:.95em;
+  transform:translateY(-50%);background:var(--line)}
+
+/* ---------- page ---------- */
+.wrap{position:relative;z-index:1;width:100%;padding-inline:var(--gx);box-sizing:border-box}
+/* left edge = the masthead's edge (as on index.html); blocks stop at --content-max on wide screens */
+.wrap > *{max-width:var(--content-max)}
+main{position:relative;z-index:1;flex:1 0 auto}
+main:focus{outline:none}
+.intro{padding:clamp(44px,10vh,120px) 0 clamp(26px,4vh,44px)}
+.eyebrow{font-family:var(--font-mono);font-size:var(--s-1);letter-spacing:.12em;text-transform:uppercase;
+  color:var(--mist);margin:0 0 .9rem;display:flex;align-items:center;gap:.7em;line-height:1.5}
+.eyebrow::before{content:"";width:22px;height:1px;background:currentColor;opacity:.6}
+h1{font-family:var(--font-display);font-style:italic;font-weight:800;font-stretch:87.5%;
+  font-size:clamp(2.6rem,1.3rem + 5.6vw,6.6rem);letter-spacing:-.025em;line-height:.95;margin:0;color:var(--pearl);
+  text-wrap:balance}
+h2{font-family:var(--font-display);font-style:italic;font-weight:700;font-stretch:87.5%;letter-spacing:-.012em;
+  line-height:1.05;margin:0;color:var(--pearl);text-wrap:balance}
+
+/* dedication + get + how */
+.top{display:grid;grid-template-columns:minmax(0,1fr);gap:clamp(36px,5vw,56px);padding-bottom:clamp(56px,9vh,104px);
+  border-top:1px solid var(--line);padding-top:clamp(32px,5vh,56px)}
+.dedication{--qi:clamp(22px,3vw,44px);position:relative;margin:0;padding:2.6rem 0 .2rem var(--qi);
+  border-left:1px solid var(--line);font-family:var(--font-body-ko);font-size:clamp(1rem,.95rem + .3vw,1.16rem);
+  line-height:2.05;color:var(--pearl-soft);max-width:42rem}
+.dedication::before{content:"\201C";position:absolute;left:calc(var(--qi) - .06em);top:-.08em;
+  font-family:var(--font-body);font-style:italic;font-size:3.6rem;line-height:1;color:var(--glow);opacity:.8}
+.dedication p{margin:0}
+/* one block per line of the original; a line too long for the column wraps with a hanging indent,
+   so the owner's own line breaks stay visible */
+.dedication .ln{display:block;padding-left:1.2em;text-indent:-1.2em}
+.dedication br{display:none}
+.dedication .sign{margin-top:1.6em;color:var(--pearl);font-weight:600;letter-spacing:.01em}
+/* her quotation closes after the signature, as on the old page */
+.dedication .sign::after{content:"\201D";font-family:var(--font-body);font-style:italic;font-weight:400;font-size:2.3em;
+  line-height:0;vertical-align:-.4em;margin-left:.14em;color:var(--glow);opacity:.8}
+
+.get{background:var(--ink-2);border-top:1px solid var(--line);padding:clamp(22px,2.6vw,36px)}
+.kicker{font-family:var(--font-mono);font-size:var(--s-1);letter-spacing:.1em;color:var(--mist);margin:0 0 .8rem;
+  display:flex;align-items:center;gap:.7em;line-height:1.5}
+.kicker::before{content:"";width:22px;height:1px;background:currentColor;opacity:.6}
+.primary{display:flex;align-items:center;justify-content:space-between;gap:16px;text-decoration:none;
+  background:var(--glow);color:var(--ink);padding:16px 18px 17px 20px;border-radius:2px;transition:background .2s}
+.primary:hover{background:var(--pearl)}
+.primary .t{display:block;font-family:var(--font-display);font-style:italic;font-weight:800;font-stretch:87.5%;
+  font-size:clamp(1.35rem,1.15rem + .8vw,1.8rem);line-height:1.05;letter-spacing:-.01em}
+.primary .u{display:block;font-family:var(--font-mono);font-size:.72rem;line-height:1.4;letter-spacing:.01em;
+  margin-top:6px;overflow-wrap:anywhere;word-break:normal}
+.primary .arr{flex:none;width:22px;height:22px}
+.help{margin:1.7rem 0 .2rem;line-height:1.7}
+.email{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;margin:.6rem 0 0}
+.email code{font-family:var(--font-mono);font-size:clamp(1rem,.9rem + .5vw,1.2rem);color:var(--pearl);user-select:all;
+  overflow-wrap:anywhere;word-break:normal}
+.btn{font:500 .78rem/1 var(--font-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink);background:var(--glow);
+  border:0;padding:9px 14px;cursor:pointer;border-radius:2px}
+.btn:hover{background:var(--pearl)}
+.status{font-family:var(--font-mono);font-size:.74rem;color:var(--mist);min-width:6em}
+
+.how h2{font-size:clamp(1.5rem,1.2rem + 1.2vw,2.2rem);margin-bottom:.9rem}
+.how p{margin:0;line-height:1.85}
+
+/* 960-1279 px: the dedication spans the full width (its longest line needs about 34em), link and note below.
+   From 1280 px: dedication on the left, its column exactly as wide as its longest line (capped at 62 %, so
+   enlarged text wraps with the hanging indent instead of squeezing the link column). */
+@media (min-width:960px){
+  .top{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"quote quote" "get how";
+    column-gap:clamp(48px,6vw,104px);row-gap:clamp(36px,5vh,52px);align-items:start}
+  .dedication{grid-area:quote}
+  .get{grid-area:get}
+  .how{grid-area:how;padding-inline:clamp(22px,2.6vw,36px)}
+}
+@media (min-width:1280px){
+  .top{grid-template-columns:fit-content(62%) minmax(0,1fr);grid-template-areas:"quote get" "quote how";
+    column-gap:clamp(48px,5vw,96px)}
+  .dedication{margin-top:.4rem;max-width:none}
+}
+
+/* ---------- preview: one sheet at a time ---------- */
+.preview{position:relative;z-index:1;border-top:1px solid var(--line)}
+.preview > .wrap{padding-top:clamp(32px,5vh,56px)}
+.preview-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 18px;margin-bottom:clamp(22px,3.4vh,36px)}
+.preview-head h2{font-size:var(--s2)}
+.updated{margin:0;font-family:var(--font-mono);font-size:.78rem;color:var(--mist);letter-spacing:.02em}
+
+.viewer{--w:min(100%, 700px, max(270px, calc((100svh - 196px) * .7069)));display:flex;flex-direction:column;align-items:center;
+  background:radial-gradient(60% 46% at 50% 38%, var(--desk-haze), transparent 72%)}
+/* the sheet keeps one A4 box (1018x1440 and 800x1132 are both 1:1.414), so turning a page never moves the layout */
+.desk{width:var(--w)}
+.sheet{appearance:none;-webkit-appearance:none;display:block;position:relative;width:100%;aspect-ratio:1018 / 1440;
+  margin:0;padding:0;border:0;border-radius:1px;background:var(--paper);cursor:zoom-in;overflow:hidden;
+  touch-action:pan-y;-webkit-tap-highlight-color:transparent;
+  box-shadow:
+    4px 4px 0 -1px var(--paper-under),
+    8px 8px 0 -2px var(--paper-under-2),
+    0 30px 60px -22px var(--sheet-shadow-far),
+    0 4px 14px var(--sheet-shadow-near)}
+.sheet img{display:block;width:100%;height:100%;object-fit:contain;background:var(--paper);user-select:none;
+  -webkit-user-drag:none}
+.sheet .enlarge{position:absolute;right:10px;top:10px;display:inline-flex;align-items:center;gap:6px;
+  font:500 .68rem/1 var(--font-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--pearl);
+  background:var(--btn-bg);padding:7px 9px;border-radius:2px;opacity:0;transition:opacity .2s;pointer-events:none}
+.sheet .enlarge svg{width:12px;height:12px}
+.sheet:hover .enlarge,.sheet:focus-visible .enlarge{opacity:1}
+@media (hover:none){.sheet .enlarge{opacity:.92}}
+@media (prefers-reduced-motion:no-preference){
+  .sheet img.in-next{animation:in-next .3s cubic-bezier(.2,.7,.2,1)}
+  .sheet img.in-prev{animation:in-prev .3s cubic-bezier(.2,.7,.2,1)}
+}
+@keyframes in-next{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:none}}
+@keyframes in-prev{from{opacity:0;transform:translateX(-18px)}to{opacity:1;transform:none}}
+
+.bar{width:var(--w);display:grid;grid-template-columns:44px minmax(0,1fr) 44px;align-items:center;gap:12px;
+  margin-top:22px}
+.cap{margin:0;text-align:center;display:flex;flex-direction:column;align-items:center;gap:2px;line-height:1.35;min-width:0}
+.count{font-family:var(--font-mono);font-size:.8rem;letter-spacing:.06em;color:var(--mist);font-variant-numeric:tabular-nums}
+.count b{font-weight:500;color:var(--pearl)}
+.label{font-family:var(--font-ui-ko);font-size:.95rem;font-weight:500;color:var(--pearl)}
+.icon-btn{appearance:none;-webkit-appearance:none;width:44px;height:44px;display:inline-grid;place-items:center;margin:0;
+  padding:0;border:1px solid var(--line);border-radius:2px;background:var(--btn-bg);color:var(--pearl);cursor:pointer;
+  transition:border-color .2s,color .2s}
+.icon-btn svg{width:18px;height:18px}
+.icon-btn:hover:not(:disabled){border-color:var(--glow);color:var(--glow)}
+.icon-btn:disabled{opacity:.35;cursor:default}
+
+.strip{position:relative;width:100%;margin-top:clamp(22px,3.4vh,34px);overflow-x:auto;overflow-y:hidden;
+  overscroll-behavior-x:contain;scrollbar-width:thin;scrollbar-color:var(--line) transparent;
+  padding:6px 0 10px}
+.thumbs{list-style:none;margin:0 auto;padding:0 4px;display:flex;gap:12px;width:max-content}
+.thumbs li{flex:none}
+.thumb{appearance:none;-webkit-appearance:none;display:flex;flex-direction:column;align-items:center;gap:7px;margin:0;
+  padding:0;border:0;background:none;color:var(--faint-text);cursor:pointer;font:500 .66rem/1 var(--font-mono);
+  letter-spacing:.06em;font-variant-numeric:tabular-nums}
+.thumb img{display:block;width:62px;height:auto;aspect-ratio:1018 / 1440;object-fit:contain;background:var(--paper);
+  opacity:.62;outline:1px solid transparent;outline-offset:3px;transition:opacity .2s,outline-color .2s}
+.thumb:hover img{opacity:.9}
+.thumb:hover{color:var(--mist)}
+.thumb[aria-current="true"]{color:var(--glow)}
+.thumb[aria-current="true"] img{opacity:1;outline-color:var(--glow)}
+.thumb:focus-visible{outline:none}
+.thumb:focus-visible img{outline:2px solid var(--focus);outline-offset:3px;opacity:1}
+
+.hint{margin:10px 0 0;font-family:var(--font-mono);font-size:.68rem;letter-spacing:.06em;color:var(--faint-text);
+  text-align:center;line-height:1.5;text-wrap:balance}
+.hint .h-touch{display:none}
+@media (hover:none),(pointer:coarse){.hint .h-key{display:none}.hint .h-touch{display:inline}}
+
+.nojs-list{font-family:var(--font-mono-ko);font-size:.8rem;columns:2 12rem;margin:1.6rem 0 0;padding-left:1.4em}
+.no-js .bar,.no-js .strip,.no-js .hint,.no-js .sheet .enlarge{display:none}
+.no-js .sheet{cursor:default}
+
+/* ---------- full-size dialog ---------- */
+dialog.zoom{padding:0;border:1px solid var(--line);border-radius:2px;background:var(--ink-2);color:var(--pearl);
+  width:min(calc(100vw - 32px),1120px);max-width:none;height:calc(100vh - 32px);height:calc(100dvh - 32px);max-height:none;
+  overflow:hidden;box-shadow:0 30px 80px var(--zoom-shadow)}
+dialog.zoom[open]{display:flex;flex-direction:column}
+dialog.zoom::backdrop{background:var(--scrim)}
+.zoom-bar{display:flex;align-items:center;gap:10px;padding:10px 12px 10px 18px;border-bottom:1px solid var(--line);
+  flex:none}
+.zoom-bar .cap{flex:1;align-items:flex-start;text-align:left;flex-direction:row;flex-wrap:wrap;gap:2px 14px;
+  align-items:baseline}
+.zoom-scroll{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding:clamp(14px,3vw,36px);
+  -webkit-overflow-scrolling:touch}
+/* fit to the dialog's width, never past the page's own pixel width (the 800 px pages stay sharp) */
+.zoom-scroll img{display:block;margin:0 auto;width:min(100%,var(--nw,1018px));height:auto;background:var(--paper);
+  box-shadow:0 20px 50px -18px var(--zoom-img-shadow)}
+@media (prefers-reduced-motion:no-preference){
+  dialog.zoom[open]{animation:zoom-in .22s cubic-bezier(.2,.7,.2,1)}
+  dialog.zoom[open]::backdrop{animation:fade-in .22s ease-out}
+}
+@keyframes zoom-in{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:none}}
+@keyframes fade-in{from{opacity:0}to{opacity:1}}
+
+.foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px 24px;margin-top:clamp(64px,10vh,120px);
+  padding-top:1rem;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 32px);border-top:1px solid var(--line);
+  font-family:var(--font-mono);font-size:.72rem;line-height:1.6;color:var(--mist)}
+.foot a{color:var(--mist);text-decoration:none}
+.foot a:hover{color:var(--pearl);text-decoration:underline;text-decoration-color:var(--glow)}
+
+@media (prefers-reduced-motion:reduce){
+  .primary,.btn,.icon-btn,.thumb img,.sheet .enlarge{transition:none}
+}
+
+/* ---------- phones ---------- */
+@media (max-width:719px){
+  :root{--mast-h:100px}
+  .masthead{padding:12px 16px 10px;gap:4px 12px}
+  /* the links share the brand's line and wrap to a second, right-aligned line */
+  .quick{flex:1 1 0;min-width:0;justify-content:flex-end;gap:0 12px;font-size:.8rem}
+  .quick a:not(.page) + a.page{margin-left:0}
+  .quick a:not(.page) + a.page::before{display:none}
+  .wrap{padding-inline:16px}
+  .eyebrow{letter-spacing:.08em;font-size:.68rem;margin-bottom:.6rem}
+  .top{gap:40px}
+  .dedication{padding-left:20px;line-height:1.95}
+  .get{padding:22px 18px}
+  .primary{padding:15px 16px}
+  .bar{grid-template-columns:44px minmax(0,1fr) 44px;gap:8px;margin-top:20px}
+  .thumb img{width:52px}
+  .thumbs{gap:10px}
+  dialog.zoom{width:100vw;height:100vh;height:100dvh;border:0;border-radius:0;margin:0;max-width:100vw;max-height:100dvh}
+  .zoom-bar{padding:calc(env(safe-area-inset-top,0px) + 8px) 10px 8px 16px}
+  .zoom-scroll{padding:0 0 env(safe-area-inset-bottom,0px)}
+  /* full size on a phone means larger than the inline sheet: twice the screen width (or the page's own
+     width if smaller), panned in both directions */
+  .zoom-scroll img{width:min(var(--nw,1018px),200vw);max-width:none;margin:0}
+}
+/* narrow phones (320-359 px): smaller links keep the masthead at two rows */
+@media (max-width:359px){
+  .quick{gap:0 10px;font-size:.74rem}
+  .brand{font-size:.98rem}
+}
+</style>
+</head>
+<body>
+<div class="backdrop" aria-hidden="true"></div>
+<a class="skip" href="#main" lang="en">Skip to content</a>
+
+<header class="masthead" lang="en">
+  <a class="brand" href="index.html">So Yeon Kim</a>
+  <nav class="quick" aria-label="Site">
+    <a href="index.html#descend">Research</a>
+    <a href="index.html#publications">Publications</a>
+    <a href="index.html#cv">CV</a>
+    <a href="index.html#contact">Contact</a>
+    <a class="page" href="travels.html">Travels</a>
+    <a class="page" href="latex-for-cbnu.html" aria-current="page">LaTex for CBNU</a>
+  </nav>
+</header>
+
+<main id="main" tabindex="-1">
+  <div class="wrap">
+    <header class="intro">
+      <p class="eyebrow" lang="en">Chungbuk National University</p>
+      <h1 lang="en">LaTex for CBNU</h1>
+    </header>
+
+    <div class="top">
+      <blockquote class="dedication">
+        <p><span class="ln">충북대학교 화학과 박재우 교수님의</span><br>
+        <span class="ln">학생들에 대한 믿음과 사랑은</span><br>
+        <span class="ln">저에게 무엇이든 할 수 있다는 자신감과 타인을 위한 이타심을 가르쳐주셨습니다.</span><br>
+        <span class="ln">이 LaTex for CBNU은 교수님에 대한 저의 감사함과 존경심입니다.</span><br>
+        <span class="ln">교수님, 언제나 감사하고 존경합니다.</span></p>
+        <p class="sign">-행복한 과학자 김소연 드림-</p>
+      </blockquote>
+
+      <div class="get">
+        <p class="kicker" lang="en">click here</p>
+        <a class="primary" href="https://bitbucket.org/soyun9498/latex-for-cbnu/src/master/" target="_blank" rel="noopener" lang="en">
+          <span><span class="t">&ldquo;LaTex for CBNU&rdquo;</span><span class="u">bitbucket.org/<wbr>soyun9498/<wbr>latex-for-cbnu</span><span class="vh"> (opens in a new tab)</span></span>
+          <svg class="arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M7 17 17 7M8 7h9v9"/></svg>
+        </a>
+        <p class="help">도움이 필요하다면 언제든지 연락주세요!</p>
+        <div class="email" lang="en">
+          <code id="email">sonnykim@kaist.ac.kr</code>
+          <button class="btn" type="button" id="copy-email">Copy email</button>
+          <span class="status" id="copy-status" role="status" aria-live="polite"></span>
+        </div>
+      </div>
+
+      <section class="how" aria-labelledby="h-how">
+        <h2 id="h-how" lang="en">How to use it</h2>
+        <p>천천히 작성 예정입니다.. 하하..<br>
+        조금만 기다려주세용</p>
+      </section>
+    </div>
+  </div>
+
+  <section class="preview" aria-labelledby="h-preview">
+    <div class="wrap">
+      <div class="preview-head">
+        <h2 id="h-preview" lang="en">Preview</h2>
+        <p class="updated" lang="en">(last update: 2023.09.03)</p>
+      </div>
+
+      <div class="viewer" id="viewer" role="group" aria-labelledby="h-preview" aria-describedby="viewer-hint">
+        <div class="desk">
+          <button class="sheet" id="sheet" type="button" aria-label="1쪽 크게 보기" aria-describedby="cap">
+            <img id="sheet-img" src="assets/latex/page-01.jpg" width="1018" height="1440" loading="lazy" decoding="async" alt="미리보기 1쪽: 석사학위논문 겉표지">
+            <span class="enlarge" aria-hidden="true" lang="en"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>Full size</span>
+          </button>
+        </div>
+
+        <div class="bar">
+          <button class="icon-btn" id="prev" type="button" aria-label="이전 쪽" disabled>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+          </button>
+          <p class="cap" id="cap" aria-live="polite"><span class="count"><b id="cur">1</b> / 13</span> <span class="label" id="label">석사학위논문 겉표지</span></p>
+          <button class="icon-btn" id="next" type="button" aria-label="다음 쪽">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </button>
+        </div>
+
+        <div class="strip" id="strip">
+          <ol class="thumbs" aria-label="쪽 바로가기">
+            <li><button class="thumb" type="button" aria-current="true" aria-label="1쪽: 석사학위논문 겉표지" data-src="assets/latex/page-01.jpg" data-w="1018" data-h="1440" data-label="석사학위논문 겉표지"><img src="assets/latex/page-01-thumb.jpg" width="160" height="226" decoding="async" alt=""><span aria-hidden="true">01</span></button></li>
+            <li><button class="thumb" type="button" tabindex="-1" aria-label="2쪽: 속표지" data-src="assets/latex/page-02.jpg" data-w="1018" data-h="1440" data-label="속표지"><img src="assets/latex/page-02-thumb.jpg" width="160" height="226" decoding="async" alt=""><span aria-hidden="true">02</span></button></li>
+            <li><button class="thumb" type="button" tabindex="-1" aria-label="3쪽: 심사위원 인준" data-src="assets/latex/page-03.jpg" data-w="1018" data-h="1440" data-label="심사위원 인준"><img src="assets/latex/page-03-thumb.jpg" width="160" height="226" decoding="async" alt=""><span aria-hidden="true">03</span></button></li>
+            <li><button class="thumb" type="button" tabindex="-1" aria-label="4쪽: 차례" data-src="assets/latex/page-04.jpg" data-w="1018" data-h="1440" data-label="차례"><img src="assets/latex/page-04-thumb.jpg" width="160" height="226" decoding="async" alt=""><span aria-hidden="true">04</span></button></li>
+            <li><button class="thumb" type="button" tabindex="-1" aria-label="5쪽: English abstract" data-src="assets/latex/page-05.jpg" data-w="800" data-h="1132" data-label="English abstract"><img src="assets/latex/page-05-thumb.jpg" width="160" height="226" decoding="async" alt=""><span aria-hidden="true">05</span></button></li>
+            <li><button class="thumb" type="button" tabindex="-1" aria-label="6쪽: 국문 요약" data-src="assets/latex/page-06.jpg" data-w="800" data-h="1132" data-label="국문 요약"><img src="assets/latex/page-06-thumb.jpg" width="160" height="226" decoding="async" alt=""><span aria-hidden="true">06</span></button></li>
+            <li><button class="thumb" type="button" tabindex="-1" aria-label="7쪽: I 서론" data-src="assets/latex/page-07.jpg" data-w="1018" data-h="1440" data-label="I 서론"><img src="assets/latex/page-07-thumb.jpg" width="160" height="226" decoding="async" alt=""><span aria-hidden="true">07</span></button></li>
+            <li><button class="thumb" type="button" tabindex="-1" aria-label="8쪽: II 이론" data-src="assets/latex/page-08.jpg" data-w="1018" data-h="1440" data-label="II 이론"><img src="assets/latex/page-08-thumb.jpg" width="160" height="226" decoding="async" alt=""><span aria-hidden="true">08</span></button></li>
+            <li><button class="thumb" type="button" tabindex="-1" aria-label="9쪽: III 결과" data-src="assets/latex/page-09.jpg" data-w="1018" data-h="1440" data-label="III 결과"><img src="assets/latex/page-09-thumb.jpg" width="160" height="226" decoding="async" alt=""><span aria-hidden="true">09</span></button></li>
+            <li><button class="thumb" type="button" tabindex="-1" aria-label="10쪽: Figure 1" data-src="assets/latex/page-10.jpg" data-w="800" data-h="1132" data-label="Figure 1"><img src="assets/latex/page-10-thumb.jpg" width="160" height="226" decoding="async" alt=""><span aria-hidden="true">10</span></button></li>
+            <li><button class="thumb" type="button" tabindex="-1" aria-label="11쪽: Figure 2" data-src="assets/latex/page-11.jpg" data-w="800" data-h="1132" data-label="Figure 2"><img src="assets/latex/page-11-thumb.jpg" width="160" height="226" decoding="async" alt=""><span aria-hidden="true">11</span></button></li>
+            <li><button class="thumb" type="button" tabindex="-1" aria-label="12쪽: IV 결론" data-src="assets/latex/page-12.jpg" data-w="1018" data-h="1440" data-label="IV 결론"><img src="assets/latex/page-12-thumb.jpg" width="160" height="226" decoding="async" alt=""><span aria-hidden="true">12</span></button></li>
+            <li><button class="thumb" type="button" tabindex="-1" aria-label="13쪽: References" data-src="assets/latex/page-13.jpg" data-w="1018" data-h="1440" data-label="References"><img src="assets/latex/page-13-thumb.jpg" width="160" height="226" decoding="async" alt=""><span aria-hidden="true">13</span></button></li>
+          </ol>
+        </div>
+        <p class="hint" id="viewer-hint" lang="en"><span class="h-key">&larr; &rarr; turn pages &middot; click the page for full&nbsp;size</span><span class="h-touch">Swipe to turn pages &middot; tap the page for full&nbsp;size</span></p>
+      </div>
+
+      <noscript>
+        <ol class="nojs-list">
+          <li><a href="assets/latex/page-01.jpg">석사학위논문 겉표지</a></li>
+          <li><a href="assets/latex/page-02.jpg">속표지</a></li>
+          <li><a href="assets/latex/page-03.jpg">심사위원 인준</a></li>
+          <li><a href="assets/latex/page-04.jpg">차례</a></li>
+          <li><a href="assets/latex/page-05.jpg">English abstract</a></li>
+          <li><a href="assets/latex/page-06.jpg">국문 요약</a></li>
+          <li><a href="assets/latex/page-07.jpg">I 서론</a></li>
+          <li><a href="assets/latex/page-08.jpg">II 이론</a></li>
+          <li><a href="assets/latex/page-09.jpg">III 결과</a></li>
+          <li><a href="assets/latex/page-10.jpg">Figure 1</a></li>
+          <li><a href="assets/latex/page-11.jpg">Figure 2</a></li>
+          <li><a href="assets/latex/page-12.jpg">IV 결론</a></li>
+          <li><a href="assets/latex/page-13.jpg">References</a></li>
+        </ol>
+      </noscript>
+    </div>
+  </section>
+</main>
+
+<div class="wrap">
+  <footer class="foot" lang="en">
+    <span>So Yeon Kim &middot; Department of Chemistry, KAIST</span>
+    <a href="index.html">Back to home</a>
+  </footer>
+</div>
+
+<dialog class="zoom" id="zoom" aria-labelledby="zoom-cap">
+  <div class="zoom-bar">
+    <p class="cap" id="zoom-cap" aria-live="polite"><span class="count"><b id="zoom-cur">1</b> / 13</span> <span class="label" id="zoom-label">석사학위논문 겉표지</span></p>
+    <button class="icon-btn" id="zoom-prev" type="button" aria-label="이전 쪽">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+    </button>
+    <button class="icon-btn" id="zoom-next" type="button" aria-label="다음 쪽">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </button>
+    <button class="icon-btn" id="zoom-close" type="button" aria-label="닫기">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+  </div>
+  <div class="zoom-scroll" id="zoom-scroll">
+    <img id="zoom-img" src="assets/latex/page-01.jpg" width="1018" height="1440" loading="lazy" decoding="async" alt="미리보기 1쪽: 석사학위논문 겉표지">
+  </div>
+</dialog>
+
+<script>
+(function () {
+  'use strict';
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+  var $ = function (id) { return document.getElementById(id); };
+
+  /* ---- copy e-mail: clipboard inside the click; on failure select the text instead ---- */
+  var copyBtn = $('copy-email'), copyStatus = $('copy-status'), emailEl = $('email');
+  var sayTimer = 0;
+  function say(t) { // empty first, so a repeat click is announced again
+    copyStatus.textContent = '';
+    clearTimeout(sayTimer);
+    sayTimer = setTimeout(function () { copyStatus.textContent = t; }, 60);
+  }
+  copyBtn.addEventListener('click', function () {
+    var text = emailEl.textContent.trim();
+    function select() {
+      var r = document.createRange(); r.selectNodeContents(emailEl);
+      var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+      say('Selected: press Ctrl+C or ⌘C');
+    }
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () { say('Copied'); }, select);
+      } else select();
+    } catch (e) { select(); }
+  });
+
+  /* ---- page viewer ---- */
+  var viewer = $('viewer'), sheet = $('sheet'), img = $('sheet-img'), prev = $('prev'), next = $('next');
+  var curEl = $('cur'), labelEl = $('label'), strip = $('strip');
+  var dlg = $('zoom'), zimg = $('zoom-img'), zprev = $('zoom-prev'), znext = $('zoom-next'), zclose = $('zoom-close');
+  var zcur = $('zoom-cur'), zlabel = $('zoom-label'), zscroll = $('zoom-scroll');
+  var thumbs = Array.prototype.slice.call(viewer.querySelectorAll('.thumb'));
+  var pages = thumbs.map(function (b) {
+    return { src: b.getAttribute('data-src'), w: +b.getAttribute('data-w'), h: +b.getAttribute('data-h'),
+             label: b.getAttribute('data-label') };
+  });
+  var N = pages.length, cur = 0, token = 0, lastFocus = null;
+
+  function altOf(i) { return '미리보기 ' + (i + 1) + '쪽: ' + pages[i].label; } // 미리보기 N쪽: label
+  function setImg(el, i) {
+    var p = pages[i];
+    el.width = p.w; el.height = p.h; el.alt = altOf(i); el.src = p.src;
+    el.style.setProperty('--nw', p.w + 'px');
+  }
+  function preload(i) {
+    if (i < 0 || i >= N) return;
+    var im = new Image(); im.decoding = 'async'; im.src = pages[i].src;
+  }
+  function centerThumb(i, smooth) {
+    var b = thumbs[i];
+    var left = b.offsetLeft + b.offsetWidth / 2 - strip.clientWidth / 2;
+    left = Math.max(0, Math.min(left, strip.scrollWidth - strip.clientWidth));
+    if (strip.scrollTo) strip.scrollTo({ left: left, behavior: smooth && !reduce.matches ? 'smooth' : 'auto' });
+    else strip.scrollLeft = left;
+  }
+  function flip(dir) {
+    img.classList.remove('in-next', 'in-prev');
+    void img.offsetWidth; // restart the animation
+    img.classList.add(dir > 0 ? 'in-next' : 'in-prev');
+  }
+  function syncButtons(a, b) {
+    var atStart = cur === 0, atEnd = cur === N - 1;
+    var active = document.activeElement;
+    a.disabled = atStart; b.disabled = atEnd;
+    if (active === a && atStart) b.focus();
+    if (active === b && atEnd) a.focus();
+  }
+
+  function show(i, focusThumb) {
+    i = Math.max(0, Math.min(N - 1, i));
+    if (i === cur) return;
+    var dir = i > cur ? 1 : -1;
+    cur = i;
+    var p = pages[i], my = ++token;
+    var pre = new Image(); pre.src = p.src;
+    var swap = function () { if (my !== token) return; setImg(img, i); flip(dir); };
+    if (pre.decode) pre.decode().then(swap, swap); else swap();
+
+    curEl.textContent = String(i + 1); labelEl.textContent = p.label;
+    zcur.textContent = String(i + 1); zlabel.textContent = p.label;
+    sheet.setAttribute('aria-label', (i + 1) + '쪽 크게 보기'); // N쪽 크게 보기
+    thumbs.forEach(function (b, k) {
+      if (k === i) { b.setAttribute('aria-current', 'true'); b.tabIndex = 0; }
+      else { b.removeAttribute('aria-current'); b.tabIndex = -1; }
+    });
+    syncButtons(prev, next);
+    syncButtons(zprev, znext);
+    if (dlg.open) { setImg(zimg, i); zscroll.scrollTop = 0; zscroll.scrollLeft = 0; }
+    centerThumb(i, true);
+    if (focusThumb) thumbs[i].focus({ preventScroll: true });
+    preload(i + 1); preload(i - 1);
+  }
+
+  prev.addEventListener('click', function () { show(cur - 1); });
+  next.addEventListener('click', function () { show(cur + 1); });
+  thumbs.forEach(function (b, k) { b.addEventListener('click', function () { show(k); }); });
+
+  function keyTarget(e) {
+    if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return null;
+    switch (e.key) {
+      case 'ArrowRight': return cur + 1;
+      case 'ArrowLeft': return cur - 1;
+      case 'Home': return 0;
+      case 'End': return N - 1;
+    }
+    return null;
+  }
+  viewer.addEventListener('keydown', function (e) {
+    var t = keyTarget(e);
+    if (t === null) return;
+    e.preventDefault();
+    show(t, e.target.classList && e.target.classList.contains('thumb'));
+  });
+
+  /* swipe the sheet on touch screens; a tap still opens the full-size view */
+  var sx = null, sy = 0, swiped = false;
+  sheet.addEventListener('pointerdown', function (e) {
+    if (e.pointerType === 'mouse') return;
+    sx = e.clientX; sy = e.clientY;
+  });
+  sheet.addEventListener('pointerup', function (e) {
+    if (sx === null) return;
+    var dx = e.clientX - sx, dy = e.clientY - sy; sx = null;
+    if (Math.abs(dx) > 40 && Math.abs(dx) > 1.5 * Math.abs(dy)) {
+      swiped = true; setTimeout(function () { swiped = false; }, 450);
+      show(cur + (dx < 0 ? 1 : -1));
+    }
+  });
+  sheet.addEventListener('pointercancel', function () { sx = null; });
+
+  /* full-size view */
+  function openZoom() {
+    if (!dlg.showModal) return;
+    setImg(zimg, cur);
+    zcur.textContent = String(cur + 1); zlabel.textContent = pages[cur].label;
+    syncButtons(zprev, znext);
+    lastFocus = document.activeElement;
+    dlg.showModal();
+    zscroll.scrollTop = 0; zscroll.scrollLeft = 0;
+    zclose.focus();
+  }
+  sheet.addEventListener('click', function (e) {
+    if (swiped) { swiped = false; e.preventDefault(); return; }
+    openZoom();
+  });
+  zprev.addEventListener('click', function () { show(cur - 1); });
+  znext.addEventListener('click', function () { show(cur + 1); });
+  zclose.addEventListener('click', function () { dlg.close(); });
+  dlg.addEventListener('click', function (e) { if (e.target === dlg || e.target === zscroll) dlg.close(); });
+  dlg.addEventListener('keydown', function (e) {
+    var t = keyTarget(e);
+    if (t === null || e.key === 'Home' || e.key === 'End') return;
+    e.preventDefault();
+    show(t);
+  });
+  dlg.addEventListener('close', function () {
+    var back = lastFocus && document.contains(lastFocus) && lastFocus !== document.body ? lastFocus : sheet;
+    back.focus({ preventScroll: true });
+    lastFocus = null;
+  });
+
+  preload(1);
+})();
+</script>
+</body>
+</html>
