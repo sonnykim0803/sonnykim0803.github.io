@@ -5,22 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#071020">
 <title>Travels · So Yeon Kim</title>
-<meta name="description" content="Travels: photographs by So Yeon Kim from Helsinki, Tallinn, Prague, Linz, Budapest, München, Zürich, Geneva and Les Houches.">
+<meta name="description" content="Travels: photographs by So Yeon Kim from Les Houches, Geneva, Zürich, Linz, Prague, Budapest, München, Tallinn, Helsinki, Cambridge and Boston.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23071020'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%23ff9a4c'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,400..800;1,62..125,400..800&family=JetBrains+Mono:wght@400;500&family=Source+Serif+4:ital,opsz,wght@0,8..60,300..600;1,8..60,300..600&display=swap">
 <style>
-/* Travels: the same night-blue world as the main page, without the landscape. Under the title, a journey: a 3D
-   globe and the nine photographs as one column of steps, about a screen each. Scrolling flies a small plane
-   from Korea along great circles to each photo's place in turn: it reaches a city when that photo's centre
-   crosses the middle of the screen, the globe turns to keep it near the centre and zooms in for the short
-   European legs. Desktop: the globe sticks on the left under the masthead, the photos scroll on the right.
-   Phones and portrait tablets: the globe sticks in a band under the masthead and the photos scroll below it.
-   Without JS or without d3 the globe is hidden and the photos form a plain grid (3 / 2 / 1 columns, the
-   middle column a little lower). Click a photo to open it full size in a native <dialog> viewer. Each photo is
-   captioned with the place as on the old site plus its city-centre latitude/longitude.
+/* Travels: the same night-blue world as the main page, without the landscape. Under the title, a journey (the
+   Ph.D course as a trip): a boarding pass, then a 3D globe and the photographs, in the order the places were
+   visited, as one column of steps, about a screen each. The first scroll tears the boarding pass; then a small
+   plane flies from Korea along great circles to each photo's place in turn (Europe, then straight on to Boston,
+   where it stays for the last three photos, then home to Korea): it reaches a city when that place's first photo's centre crosses
+   the middle of the screen, the globe turns to keep it near the centre and zooms in for the short European
+   legs and for the stay in Boston. Desktop: the globe sticks on the left under the masthead, the pass and the
+   photos scroll on the right. Phones and portrait tablets: the globe sticks in a band under the masthead and
+   the pass and the photos scroll below it. Without JS or without d3
+   the globe is hidden, the pass stays whole above the photos and they form a plain grid (3 / 2 / 1 columns,
+   the middle column a little lower). Click a photo to open it full size in a native <dialog> viewer. Each
+   photo is captioned with the place as on the old site plus its city-centre latitude/longitude.
    Globe: orthographic, drawn on a canvas with d3-geo (pinned, from jsDelivr); outlines are Natural Earth 1:50m
    in assets/globe-data.js, written by tools/make_globe_data.py. */
 :root{
@@ -174,6 +177,94 @@ h1{font-family:var(--font-display);font-style:italic;font-weight:800;font-stretc
 .grid > li.is-current .frame img{filter:none}
 .grid > li.is-current .no{color:var(--glow-core);text-shadow:0 0 8px var(--glow)}
 
+/* ---------- boarding pass (above the photos; with the globe it tears as the flight begins, see the script) ----------
+   A pearl paper ticket in two pieces, the main part and the stub, cut along a perforation: each piece carries half
+   of every perforation hole and half of each big notch, so together they read as one ticket with round holes, and
+   apart each shows a scalloped torn edge. Narrow (phones, the 1024 px column): the stub sits under the main part;
+   wide (from 27.5rem): beside it. */
+.boarding{margin-top:clamp(28px,5vh,48px)}
+.pass{position:relative;width:100%;max-width:34rem;container-type:inline-size}
+.bp{--paper:#edf1f6;--p-ink:var(--ink);--p-label:#52647d;--p-band:var(--glow);--r:2.4px;--R:9px;--per:9px;
+  display:grid;grid-template-columns:minmax(0,1fr);color:var(--p-ink);font-family:var(--font-body);
+  filter:drop-shadow(0 14px 20px var(--shadow)) drop-shadow(0 2px 3px rgba(2,6,14,.3))}
+.bp-main,.bp-stub{position:relative;min-width:0}
+/* the stub tucks 1px under the main part (its holes and notches shifted to match), so no seam shows between them */
+.bp-stub{margin-top:-1px;transform-origin:0 1px}
+.bp-paper{position:relative;box-sizing:border-box;height:100%;background:var(--paper)}
+.bp-main .bp-paper{border-radius:7px 7px 0 0;
+  -webkit-mask:radial-gradient(circle at 0 100%,#0000 var(--R),#000 calc(var(--R) + .5px)),
+    radial-gradient(circle at 100% 100%,#0000 var(--R),#000 calc(var(--R) + .5px)),
+    radial-gradient(circle at 50% 100%,#0000 var(--r),#000 calc(var(--r) + .5px)) 50% 0 / var(--per) 100% repeat-x;
+  -webkit-mask-composite:source-in;
+  mask:radial-gradient(circle at 0 100%,#0000 var(--R),#000 calc(var(--R) + .5px)),
+    radial-gradient(circle at 100% 100%,#0000 var(--R),#000 calc(var(--R) + .5px)),
+    radial-gradient(circle at 50% 100%,#0000 var(--r),#000 calc(var(--r) + .5px)) 50% 0 / var(--per) 100% repeat-x;
+  mask-composite:intersect}
+.bp-stub .bp-paper{display:flex;align-items:baseline;gap:4px 14px;padding:13px 18px 15px;border-radius:0 0 7px 7px;
+  -webkit-mask:radial-gradient(circle at 0 1px,#0000 var(--R),#000 calc(var(--R) + .5px)),
+    radial-gradient(circle at 100% 1px,#0000 var(--R),#000 calc(var(--R) + .5px)),
+    radial-gradient(circle at 50% 1px,#0000 var(--r),#000 calc(var(--r) + .5px)) 50% 0 / var(--per) 100% repeat-x;
+  -webkit-mask-composite:source-in;
+  mask:radial-gradient(circle at 0 1px,#0000 var(--R),#000 calc(var(--R) + .5px)),
+    radial-gradient(circle at 100% 1px,#0000 var(--R),#000 calc(var(--R) + .5px)),
+    radial-gradient(circle at 50% 1px,#0000 var(--r),#000 calc(var(--r) + .5px)) 50% 0 / var(--per) 100% repeat-x;
+  mask-composite:intersect}
+.bp-band{display:flex;align-items:center;justify-content:space-between;gap:12px;height:30px;padding:0 18px;
+  background:var(--p-band);border-radius:7px 7px 0 0}
+.bp-title{margin:0;font:500 .66rem/1 var(--font-mono);letter-spacing:.26em;color:var(--p-ink)}
+.bp-route{display:block;flex:none;width:76px;height:14px;fill:currentColor;color:var(--p-ink)}
+.bp-fields{margin:0;padding:15px 18px 19px;display:grid;grid-template-columns:auto auto;justify-content:space-between;
+  gap:14px 16px}
+.bp-f{min-width:0}
+.bp-f dt{margin:0 0 6px;font:500 .6rem/1 var(--font-mono);letter-spacing:.18em;color:var(--p-label)}
+.bp-f dd{margin:0;font-family:var(--font-display);font-style:italic;font-weight:700;font-stretch:87.5%;font-size:1.06rem;
+  line-height:1.1;letter-spacing:-.005em;color:var(--p-ink)}
+.bp-pax dd{font-weight:800;font-size:1.36rem;line-height:1.05}
+.bp-sub{display:block;margin-top:5px;font:500 .6rem/1.2 var(--font-mono);font-style:normal;letter-spacing:.14em;
+  color:var(--p-label)}
+/* the stub keeps the name on one line */
+.bp-s-title,.bp-s-name{margin:0;font-family:var(--font-display);font-style:italic;font-stretch:87.5%;line-height:1;
+  white-space:nowrap;color:var(--p-ink)}
+.bp-s-title{font-weight:700;font-size:.95rem}
+.bp-s-name{font-weight:800;font-size:min(1.6rem, 7.5cqi);letter-spacing:-.01em}
+/* a strip of bars like a barcode (decorative) */
+.bp-bars{flex:none;align-self:center;margin-left:auto;width:62px;height:26px;opacity:.86;background:
+  repeating-linear-gradient(90deg,var(--p-ink) 0 2px,#0000 2px 4px,var(--p-ink) 4px 5px,#0000 5px 8px,
+    var(--p-ink) 8px 11px,#0000 11px 12px,var(--p-ink) 12px 13px,#0000 13px 16px,var(--p-ink) 16px 18px,#0000 18px 19px,
+    var(--p-ink) 19px 20px,#0000 20px 23px),
+  repeating-linear-gradient(90deg,#0000 0 9px,var(--p-ink) 9px 10px,#0000 10px 17px)}
+@container (min-width:27.5rem){
+  .bp{grid-template-columns:minmax(0,1fr) 10rem}
+  .bp-stub{margin:0 0 0 -1px;transform-origin:1px 100%}
+  .bp-main .bp-paper{border-radius:7px 0 0 7px;
+    -webkit-mask:radial-gradient(circle at 100% 0,#0000 var(--R),#000 calc(var(--R) + .5px)),
+      radial-gradient(circle at 100% 100%,#0000 var(--R),#000 calc(var(--R) + .5px)),
+      radial-gradient(circle at 100% 50%,#0000 var(--r),#000 calc(var(--r) + .5px)) 0 50% / 100% var(--per) repeat-y;
+    -webkit-mask-composite:source-in;
+    mask:radial-gradient(circle at 100% 0,#0000 var(--R),#000 calc(var(--R) + .5px)),
+      radial-gradient(circle at 100% 100%,#0000 var(--R),#000 calc(var(--R) + .5px)),
+      radial-gradient(circle at 100% 50%,#0000 var(--r),#000 calc(var(--r) + .5px)) 0 50% / 100% var(--per) repeat-y;
+    mask-composite:intersect}
+  .bp-stub .bp-paper{flex-direction:column;align-items:flex-start;gap:0;padding:0 18px 20px;border-radius:0 7px 7px 0;
+    -webkit-mask:radial-gradient(circle at 1px 0,#0000 var(--R),#000 calc(var(--R) + .5px)),
+      radial-gradient(circle at 1px 100%,#0000 var(--R),#000 calc(var(--R) + .5px)),
+      radial-gradient(circle at 1px 50%,#0000 var(--r),#000 calc(var(--r) + .5px)) 0 50% / 100% var(--per) repeat-y;
+    -webkit-mask-composite:source-in;
+    mask:radial-gradient(circle at 1px 0,#0000 var(--R),#000 calc(var(--R) + .5px)),
+      radial-gradient(circle at 1px 100%,#0000 var(--R),#000 calc(var(--R) + .5px)),
+      radial-gradient(circle at 1px 50%,#0000 var(--r),#000 calc(var(--r) + .5px)) 0 50% / 100% var(--per) repeat-y;
+    mask-composite:intersect}
+  /* the orange band runs on across the stub */
+  .bp-stub .bp-paper::before{content:"";align-self:stretch;height:30px;margin:0 -18px 17px;background:var(--p-band);
+    border-radius:0 7px 0 0}
+  .bp-band{border-radius:7px 0 0 0}
+  .bp-fields{grid-template-columns:repeat(3,auto);padding:18px 22px 22px;gap:18px 20px}
+  .bp-pax{grid-column:1 / -1}
+  .bp-pax dd{font-size:2.05rem}
+  .bp-s-name{margin-top:8px;font-size:1.4rem}
+  .bp-bars{align-self:stretch;width:auto;height:28px;margin:auto 0 0}
+}
+
 .foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px 24px;margin-top:clamp(64px,10vh,120px);
   padding-top:1rem;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 32px);border-top:1px solid var(--line);
   font-family:var(--font-mono);font-size:.72rem;color:var(--mist)}
@@ -185,8 +276,21 @@ h1{font-family:var(--font-display);font-style:italic;font-weight:800;font-stretc
 .globe-on .journey{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);column-gap:clamp(28px,4.5vw,80px);
   --step-h:calc(var(--vh100) - var(--stick-top));   /* one photo step: the screen under the masthead */
   --cap-h:132px;                                     /* caption + breathing room under each photo */
-  --lead:calc(var(--step-h) * 1.5)}                  /* the long first flight, Korea -> photo 01 */
-.globe-on .globe{display:block;position:relative;min-width:0}
+  --tear-room:calc(var(--step-h) * 1.8);             /* the boarding pass holds still this long: it tears, then
+                                                        fades slowly while the plane flies Korea -> Les Houches */
+  --lead:calc(var(--step-h) * .3);                   /* then photo 01 rises into place */
+  --far-lead:calc(var(--step-h) * 1.3);              /* the other long flight, Helsinki -> Boston (photo 10) */
+  --tail:calc(var(--step-h) * 1.6)}                  /* the flight home, Boston -> Korea, after the last photo */
+.globe-on .globe{display:block;position:relative;min-width:0;grid-column:1;grid-row:1 / span 2}
+/* the boarding pass heads the photo column: it holds still, centred in the screen (the script sets --pass-top),
+   while the visitor's first scroll tears it, then leaves with the page as the plane takes off; above the band's
+   fade on phones until it is torn. The room under it keeps the torn stub, which drops a little, clear of photo 01 */
+.globe-on .boarding{grid-column:2;grid-row:1;margin:0}
+.globe-on .boarding::after{content:"";display:block;height:var(--tear-room)}
+.globe-on .pass{position:sticky;top:var(--pass-top,calc(var(--stick-top) + 24px));z-index:5;margin:0 auto 56px;
+  max-width:min(34rem, max(18rem, calc(var(--step-h) - var(--cap-h))))}   /* as wide as the photos */
+.globe-on .pass.is-torn{z-index:auto}
+.globe-on .bp-main,.globe-on .bp-stub{will-change:transform}
 .globe-stick{position:sticky;top:var(--stick-top);height:var(--step-h)}
 .globe-canvas{position:absolute;inset:0;display:block;width:100%;height:100%;opacity:0}
 .globe.is-ready .globe-canvas{opacity:1}
@@ -204,16 +308,21 @@ h1{font-family:var(--font-display);font-style:italic;font-weight:800;font-stretc
   letter-spacing:.06em;line-height:1.2;color:var(--mist);
   text-shadow:0 0 3px var(--ink),0 0 3px var(--ink),0 0 1px var(--ink)}
 
-.globe-on .grid{display:block;margin:0;padding:0}
+.globe-on .grid{display:block;margin:0;padding:0;grid-column:2;grid-row:2}
+/* after the last photo, an empty stretch for the flight home */
+.globe-on .grid::after{content:"";display:block;height:var(--tail)}
 .globe-on .grid > li{display:flex;align-items:center;justify-content:center;min-height:var(--step-h);
   box-sizing:border-box;padding-block:12px}
-/* photo 01's step also holds the long first flight: the photo waits at the bottom of the screen with its top
-   edge showing (the script sets --hold from its height), then rises into place as the plane nears Helsinki */
-.globe-on .grid > li:first-child{flex-direction:column;justify-content:flex-start;
+/* the step of a photo at the end of a long flight also holds that flight (the script marks it .is-far): the
+   photo waits at the bottom of the screen with its top edge showing (the script sets --hold from its height),
+   then rises into place as the plane nears its city. Photo 01 (Les Houches) needs only a short lead, as most
+   of the first flight happens beside the boarding pass; photo 10 (Boston) a long one */
+.globe-on .grid > li:first-child,.globe-on .grid > li.is-far{flex-direction:column;justify-content:flex-start;
   min-height:calc(var(--lead) + var(--step-h))}
-.globe-on .grid > li:first-child::before{content:"";flex:1 0 var(--lead)}
-.globe-on .grid > li:first-child::after{content:"";flex:1 0 0px}
-.globe-on .grid > li:first-child .shot{position:sticky;bottom:var(--hold,-100000px)}
+.globe-on .grid > li.is-far:not(:first-child){--lead:var(--far-lead)}
+.globe-on .grid > li:first-child::before,.globe-on .grid > li.is-far::before{content:"";flex:1 0 var(--lead)}
+.globe-on .grid > li:first-child::after,.globe-on .grid > li.is-far::after{content:"";flex:1 0 0px}
+.globe-on .grid > li:first-child .shot,.globe-on .grid > li.is-far .shot{position:sticky;bottom:var(--hold,-100000px)}
 .globe-on .shot{width:min(100%, calc(var(--step-h) - var(--cap-h)))}
 .globe-on .frame{scroll-margin-block:16px var(--cap-h)}
 
@@ -255,6 +364,8 @@ h1{font-family:var(--font-display);font-style:italic;font-weight:800;font-stretc
   @keyframes v-in{from{opacity:0}to{opacity:1}}
   @keyframes v-img{from{opacity:.15}to{opacity:1}}
   .globe-canvas{transition:opacity .6s ease-out}
+  /* the tear follows the scroll position; this short glide plays it through even on a fast flick */
+  .globe-on .bp-main,.globe-on .bp-stub{transition:transform .7s cubic-bezier(.22,.61,.36,1),opacity .7s cubic-bezier(.22,.61,.36,1)}
 }
 @media (prefers-reduced-motion: reduce){
   .frame img,.frame::after,.frame .view,.v-btn{transition:none}
@@ -280,10 +391,14 @@ h1{font-family:var(--font-display);font-style:italic;font-weight:800;font-stretc
    photo keeps at least 56% of the width and may pass a little under the band). Screens too short for the
    band (phones held sideways) keep the plain grid: the script only turns the globe on when it fits. */
 @media (max-width:719px), (max-width:959px) and (orientation:portrait){
-  .globe-on .journey{display:block;--band-h:clamp(160px,calc(var(--vh100) * .34),460px);
-    --step-h:calc(var(--vh100) - var(--stick-top) - var(--band-h));--cap-h:100px;--lead:calc(var(--step-h) * 1.4)}
-  .globe-on .globe{position:sticky;top:var(--stick-top);z-index:4;height:var(--band-h);
+  .globe-on .journey{display:flex;flex-direction:column;--band-h:clamp(160px,calc(var(--vh100) * .34),460px);
+    --step-h:calc(var(--vh100) - var(--stick-top) - var(--band-h));--cap-h:100px;--lead:calc(var(--step-h) * .3);
+    --tear-room:calc(max(500px, calc(var(--vh100) * .88)) + var(--step-h) * .8)}
+  .globe-on .globe{order:-1;position:sticky;top:var(--stick-top);z-index:4;height:var(--band-h);
     margin-inline:calc(-1 * var(--pad));background:var(--ink)}
+  /* the boarding pass comes first in reading order but sits under the band */
+  .globe-on .boarding{margin-top:12px}
+  .globe-on .pass{max-width:min(34rem, max(22rem, 56vw, calc(var(--step-h) - var(--cap-h))))}
   .globe-on .globe::after{content:"";position:absolute;left:0;right:0;top:100%;height:48px;pointer-events:none;
     background:linear-gradient(180deg,var(--ink) 0%,rgba(7,16,32,.6) 40%,transparent 100%)}
   /* the night sky stays ink a little lower, so the band's lower edge does not show against it */
@@ -307,9 +422,11 @@ h1{font-family:var(--font-display);font-style:italic;font-weight:800;font-stretc
   .quick a:not(.page) + a.page{margin-left:0}
   .quick a:not(.page) + a.page::before{display:none}
   .intro{padding-top:40px}
+  .globe-on .intro{padding-top:24px}
   .gt-city{font-size:.88rem}
   .gt-n,.gt-country{font-size:.62rem}
   .globe-tag{padding:4px 7px 5px}
+  .bp-f dt,.bp-sub{font-size:.66rem}
 
   .viewer{--chrome:236px}
   .viewer[open]{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto;
@@ -353,6 +470,34 @@ if (!window.matchMedia || window.matchMedia('(min-height: 540px), (min-width: 72
   </header>
 
   <div class="journey">
+    <div class="boarding" id="boarding">
+      <div class="pass">
+        <div class="bp">
+          <div class="bp-main">
+            <div class="bp-paper">
+              <div class="bp-band">
+                <p class="bp-title">BOARDING PASS</p>
+                <svg class="bp-route" viewBox="0 0 92 16" aria-hidden="true" focusable="false"><circle cx="3.5" cy="8" r="2.5"/><path d="M10 8H70" fill="none" stroke="currentColor" stroke-width="1.3" stroke-dasharray="3 3.2"/><path transform="translate(82 8) rotate(90) scale(.62)" d="M0 -12L.9 -11.5L1.5 -10.4L1.7 -9L1.7 -3.5L11.4 1.7L11.4 3.5L1.7 1.3L1.35 7.3L4.9 9.8L4.9 11.3L.8 10.6L0 11.2L-.8 10.6L-4.9 11.3L-4.9 9.8L-1.35 7.3L-1.7 1.3L-11.4 3.5L-11.4 1.7L-1.7 -3.5L-1.7 -9L-1.5 -10.4L-.9 -11.5Z"/></svg>
+              </div>
+              <dl class="bp-fields">
+                <div class="bp-f bp-pax"><dt>PASSENGER</dt><dd>SO YEON KIM</dd></div>
+                <div class="bp-f"><dt>FLIGHT</dt><dd>Ph.D course</dd></div>
+                <div class="bp-f"><dt>DEPART</dt><dd>MAR 2024 <span class="bp-sub">KOREA</span></dd></div>
+                <div class="bp-f"><dt>ARRIVE</dt><dd>FEB 2028 <span class="bp-sub">(expected)</span></dd></div>
+              </dl>
+            </div>
+          </div>
+          <div class="bp-stub" aria-hidden="true">
+            <div class="bp-paper">
+              <p class="bp-s-title">Ph.D.</p>
+              <p class="bp-s-name">So Yeon Kim</p>
+              <span class="bp-bars" aria-hidden="true"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="globe" id="globe">
       <div class="globe-stick">
         <canvas class="globe-canvas" aria-hidden="true"></canvas>
@@ -365,46 +510,46 @@ if (!window.matchMedia || window.matchMedia('(min-height: 540px), (min-width: 72
     <ol class="grid" id="photos" aria-label="Photographs" tabindex="-1">
       <li id="photo-1" tabindex="-1">
         <figure class="shot">
-          <a class="frame" aria-describedby="place-1" href="assets/travels/01-helsinki.jpg" data-w="1152" data-h="1152">
-            <img src="assets/travels/01-helsinki-640.jpg" srcset="assets/travels/01-helsinki-640.jpg 640w, assets/travels/01-helsinki-960.jpg 960w, assets/travels/01-helsinki.jpg 1152w"
+          <a class="frame" aria-describedby="place-1" href="assets/travels/09-les-houches.jpg" data-w="1280" data-h="1280">
+            <img src="assets/travels/09-les-houches-640.jpg" srcset="assets/travels/09-les-houches-640.jpg 640w, assets/travels/09-les-houches-960.jpg 960w, assets/travels/09-les-houches.jpg 1280w"
                  sizes="(min-width: 960px) min(36vw, 520px), (min-width: 720px) 56vw, min(75vw, calc(100vw - 32px))"
                  width="640" height="640" decoding="async" fetchpriority="high"
-                 alt="A Christmas market at night: a lit carousel in the foreground and a white domed cathedral behind">
+                 alt="Snow-capped mountains above a green valley, a chalet roof in the foreground">
             <span class="vh">, open full size</span><span class="view" aria-hidden="true">View</span>
           </a>
           <figcaption>
-            <span class="place" id="place-1"><span class="city">Helsinki,</span> <span class="country">Finland</span></span>
-            <span class="data"><span class="coord">60.17° N, 24.94° E</span><span class="no" aria-hidden="true">01</span></span>
+            <span class="place" id="place-1"><span class="city">Les Houches,</span> <span class="country">France</span></span>
+            <span class="data"><span class="coord">45.89° N, 6.80° E</span><span class="no" aria-hidden="true">01</span></span>
           </figcaption>
         </figure>
       </li>
       <li id="photo-2" tabindex="-1">
         <figure class="shot">
-          <a class="frame" aria-describedby="place-2" href="assets/travels/02-tallinn.jpg" data-w="1280" data-h="1280">
-            <img src="assets/travels/02-tallinn-640.jpg" srcset="assets/travels/02-tallinn-640.jpg 640w, assets/travels/02-tallinn-960.jpg 960w, assets/travels/02-tallinn.jpg 1280w"
+          <a class="frame" aria-describedby="place-2" href="assets/travels/08-geneva.jpg" data-w="1239" data-h="1239">
+            <img src="assets/travels/08-geneva-640.jpg" srcset="assets/travels/08-geneva-640.jpg 640w, assets/travels/08-geneva-960.jpg 960w, assets/travels/08-geneva.jpg 1239w"
                  sizes="(min-width: 960px) min(36vw, 520px), (min-width: 720px) 56vw, min(75vw, calc(100vw - 32px))"
                  width="640" height="640" loading="lazy" decoding="async"
-                 alt="Christmas market stalls and a tall decorated tree in front of old gabled town houses">
+                 alt="An ornate Gothic-style monument in a park under a blue sky, the tall plume of the lake fountain behind it">
             <span class="vh">, open full size</span><span class="view" aria-hidden="true">View</span>
           </a>
           <figcaption>
-            <span class="place" id="place-2"><span class="city">Tallinn,</span> <span class="country">Estonia</span></span>
-            <span class="data"><span class="coord">59.44° N, 24.75° E</span><span class="no" aria-hidden="true">02</span></span>
+            <span class="place" id="place-2"><span class="city">Geneva,</span> <span class="country">Swiss</span></span>
+            <span class="data"><span class="coord">46.20° N, 6.14° E</span><span class="no" aria-hidden="true">02</span></span>
           </figcaption>
         </figure>
       </li>
       <li id="photo-3" tabindex="-1">
         <figure class="shot">
-          <a class="frame" aria-describedby="place-3" href="assets/travels/03-prague.jpg" data-w="1280" data-h="1280">
-            <img src="assets/travels/03-prague-640.jpg" srcset="assets/travels/03-prague-640.jpg 640w, assets/travels/03-prague-960.jpg 960w, assets/travels/03-prague.jpg 1280w"
+          <a class="frame" aria-describedby="place-3" href="assets/travels/07-zurich.jpg" data-w="1152" data-h="1152">
+            <img src="assets/travels/07-zurich-640.jpg" srcset="assets/travels/07-zurich-640.jpg 640w, assets/travels/07-zurich-960.jpg 960w, assets/travels/07-zurich.jpg 1152w"
                  sizes="(min-width: 960px) min(36vw, 520px), (min-width: 720px) 56vw, min(75vw, calc(100vw - 32px))"
                  width="640" height="640" loading="lazy" decoding="async"
-                 alt="A view over red-tiled rooftops towards a hazy city skyline under a clear blue sky">
+                 alt="Houses along the river at dusk with lit windows, a slender green church spire rising behind them">
             <span class="vh">, open full size</span><span class="view" aria-hidden="true">View</span>
           </a>
           <figcaption>
-            <span class="place" id="place-3"><span class="city">Prague,</span> <span class="country">Czech</span></span>
-            <span class="data"><span class="coord">50.08° N, 14.44° E</span><span class="no" aria-hidden="true">03</span></span>
+            <span class="place" id="place-3"><span class="city">Zürich,</span> <span class="country">Swiss</span></span>
+            <span class="data"><span class="coord">47.38° N, 8.54° E</span><span class="no" aria-hidden="true">03</span></span>
           </figcaption>
         </figure>
       </li>
@@ -425,7 +570,22 @@ if (!window.matchMedia || window.matchMedia('(min-height: 540px), (min-width: 72
       </li>
       <li id="photo-5" tabindex="-1">
         <figure class="shot">
-          <a class="frame" aria-describedby="place-5" href="assets/travels/05-budapest.jpg" data-w="1280" data-h="1265">
+          <a class="frame" aria-describedby="place-5" href="assets/travels/03-prague.jpg" data-w="1280" data-h="1280">
+            <img src="assets/travels/03-prague-640.jpg" srcset="assets/travels/03-prague-640.jpg 640w, assets/travels/03-prague-960.jpg 960w, assets/travels/03-prague.jpg 1280w"
+                 sizes="(min-width: 960px) min(36vw, 520px), (min-width: 720px) 56vw, min(75vw, calc(100vw - 32px))"
+                 width="640" height="640" loading="lazy" decoding="async"
+                 alt="A view over red-tiled rooftops towards a hazy city skyline under a clear blue sky">
+            <span class="vh">, open full size</span><span class="view" aria-hidden="true">View</span>
+          </a>
+          <figcaption>
+            <span class="place" id="place-5"><span class="city">Prague,</span> <span class="country">Czech</span></span>
+            <span class="data"><span class="coord">50.08° N, 14.44° E</span><span class="no" aria-hidden="true">05</span></span>
+          </figcaption>
+        </figure>
+      </li>
+      <li id="photo-6" tabindex="-1">
+        <figure class="shot">
+          <a class="frame" aria-describedby="place-6" href="assets/travels/05-budapest.jpg" data-w="1280" data-h="1265">
             <img src="assets/travels/05-budapest-640.jpg" srcset="assets/travels/05-budapest-640.jpg 640w, assets/travels/05-budapest-960.jpg 960w, assets/travels/05-budapest.jpg 1280w"
                  sizes="(min-width: 960px) min(36vw, 520px), (min-width: 720px) 56vw, min(75vw, calc(100vw - 32px))"
                  width="640" height="633" loading="lazy" decoding="async"
@@ -433,14 +593,14 @@ if (!window.matchMedia || window.matchMedia('(min-height: 540px), (min-width: 72
             <span class="vh">, open full size</span><span class="view" aria-hidden="true">View</span>
           </a>
           <figcaption>
-            <span class="place" id="place-5"><span class="city">Budapest,</span> <span class="country">Hungary</span></span>
-            <span class="data"><span class="coord">47.50° N, 19.04° E</span><span class="no" aria-hidden="true">05</span></span>
+            <span class="place" id="place-6"><span class="city">Budapest,</span> <span class="country">Hungary</span></span>
+            <span class="data"><span class="coord">47.50° N, 19.04° E</span><span class="no" aria-hidden="true">06</span></span>
           </figcaption>
         </figure>
       </li>
-      <li id="photo-6" tabindex="-1">
+      <li id="photo-7" tabindex="-1">
         <figure class="shot">
-          <a class="frame" aria-describedby="place-6" href="assets/travels/06-munchen.jpg" data-w="1280" data-h="1280">
+          <a class="frame" aria-describedby="place-7" href="assets/travels/06-munchen.jpg" data-w="1280" data-h="1280">
             <img src="assets/travels/06-munchen-640.jpg" srcset="assets/travels/06-munchen-640.jpg 640w, assets/travels/06-munchen-960.jpg 960w, assets/travels/06-munchen.jpg 1280w"
                  sizes="(min-width: 960px) min(36vw, 520px), (min-width: 720px) 56vw, min(75vw, calc(100vw - 32px))"
                  width="640" height="640" loading="lazy" decoding="async"
@@ -448,53 +608,83 @@ if (!window.matchMedia || window.matchMedia('(min-height: 540px), (min-width: 72
             <span class="vh">, open full size</span><span class="view" aria-hidden="true">View</span>
           </a>
           <figcaption>
-            <span class="place" id="place-6"><span class="city">München,</span> <span class="country">Germany</span></span>
-            <span class="data"><span class="coord">48.14° N, 11.58° E</span><span class="no" aria-hidden="true">06</span></span>
-          </figcaption>
-        </figure>
-      </li>
-      <li id="photo-7" tabindex="-1">
-        <figure class="shot">
-          <a class="frame" aria-describedby="place-7" href="assets/travels/07-zurich.jpg" data-w="1152" data-h="1152">
-            <img src="assets/travels/07-zurich-640.jpg" srcset="assets/travels/07-zurich-640.jpg 640w, assets/travels/07-zurich-960.jpg 960w, assets/travels/07-zurich.jpg 1152w"
-                 sizes="(min-width: 960px) min(36vw, 520px), (min-width: 720px) 56vw, min(75vw, calc(100vw - 32px))"
-                 width="640" height="640" loading="lazy" decoding="async"
-                 alt="Houses along the river at dusk with lit windows, a slender green church spire rising behind them">
-            <span class="vh">, open full size</span><span class="view" aria-hidden="true">View</span>
-          </a>
-          <figcaption>
-            <span class="place" id="place-7"><span class="city">Zürich,</span> <span class="country">Swiss</span></span>
-            <span class="data"><span class="coord">47.38° N, 8.54° E</span><span class="no" aria-hidden="true">07</span></span>
+            <span class="place" id="place-7"><span class="city">München,</span> <span class="country">Germany</span></span>
+            <span class="data"><span class="coord">48.14° N, 11.58° E</span><span class="no" aria-hidden="true">07</span></span>
           </figcaption>
         </figure>
       </li>
       <li id="photo-8" tabindex="-1">
         <figure class="shot">
-          <a class="frame" aria-describedby="place-8" href="assets/travels/08-geneva.jpg" data-w="1239" data-h="1239">
-            <img src="assets/travels/08-geneva-640.jpg" srcset="assets/travels/08-geneva-640.jpg 640w, assets/travels/08-geneva-960.jpg 960w, assets/travels/08-geneva.jpg 1239w"
+          <a class="frame" aria-describedby="place-8" href="assets/travels/02-tallinn.jpg" data-w="1280" data-h="1280">
+            <img src="assets/travels/02-tallinn-640.jpg" srcset="assets/travels/02-tallinn-640.jpg 640w, assets/travels/02-tallinn-960.jpg 960w, assets/travels/02-tallinn.jpg 1280w"
                  sizes="(min-width: 960px) min(36vw, 520px), (min-width: 720px) 56vw, min(75vw, calc(100vw - 32px))"
                  width="640" height="640" loading="lazy" decoding="async"
-                 alt="An ornate Gothic-style monument in a park under a blue sky, the tall plume of the lake fountain behind it">
+                 alt="Christmas market stalls and a tall decorated tree in front of old gabled town houses">
             <span class="vh">, open full size</span><span class="view" aria-hidden="true">View</span>
           </a>
           <figcaption>
-            <span class="place" id="place-8"><span class="city">Geneva,</span> <span class="country">Swiss</span></span>
-            <span class="data"><span class="coord">46.20° N, 6.14° E</span><span class="no" aria-hidden="true">08</span></span>
+            <span class="place" id="place-8"><span class="city">Tallinn,</span> <span class="country">Estonia</span></span>
+            <span class="data"><span class="coord">59.44° N, 24.75° E</span><span class="no" aria-hidden="true">08</span></span>
           </figcaption>
         </figure>
       </li>
       <li id="photo-9" tabindex="-1">
         <figure class="shot">
-          <a class="frame" aria-describedby="place-9" href="assets/travels/09-les-houches.jpg" data-w="1280" data-h="1280">
-            <img src="assets/travels/09-les-houches-640.jpg" srcset="assets/travels/09-les-houches-640.jpg 640w, assets/travels/09-les-houches-960.jpg 960w, assets/travels/09-les-houches.jpg 1280w"
+          <a class="frame" aria-describedby="place-9" href="assets/travels/01-helsinki.jpg" data-w="1152" data-h="1152">
+            <img src="assets/travels/01-helsinki-640.jpg" srcset="assets/travels/01-helsinki-640.jpg 640w, assets/travels/01-helsinki-960.jpg 960w, assets/travels/01-helsinki.jpg 1152w"
                  sizes="(min-width: 960px) min(36vw, 520px), (min-width: 720px) 56vw, min(75vw, calc(100vw - 32px))"
                  width="640" height="640" loading="lazy" decoding="async"
-                 alt="Snow-capped mountains above a green valley, a chalet roof in the foreground">
+                 alt="A Christmas market at night: a lit carousel in the foreground and a white domed cathedral behind">
             <span class="vh">, open full size</span><span class="view" aria-hidden="true">View</span>
           </a>
           <figcaption>
-            <span class="place" id="place-9"><span class="city">Les Houches,</span> <span class="country">France</span></span>
-            <span class="data"><span class="coord">45.89° N, 6.80° E</span><span class="no" aria-hidden="true">09</span></span>
+            <span class="place" id="place-9"><span class="city">Helsinki,</span> <span class="country">Finland</span></span>
+            <span class="data"><span class="coord">60.17° N, 24.94° E</span><span class="no" aria-hidden="true">09</span></span>
+          </figcaption>
+        </figure>
+      </li>
+      <li id="photo-10" tabindex="-1">
+        <figure class="shot">
+          <a class="frame" aria-describedby="place-10" href="assets/travels/10-harvard.jpg" data-w="1280" data-h="1280">
+            <img src="assets/travels/10-harvard-640.jpg" srcset="assets/travels/10-harvard-640.jpg 640w, assets/travels/10-harvard-960.jpg 960w, assets/travels/10-harvard.jpg 1280w"
+                 sizes="(min-width: 960px) min(36vw, 520px), (min-width: 720px) 56vw, min(75vw, calc(100vw - 32px))"
+                 width="640" height="640" loading="lazy" decoding="async"
+                 alt="A seated bronze statue on a granite plinth inscribed John Harvard, Founder, a person in a white shirt reaching up to touch its shoe">
+            <span class="vh">, open full size</span><span class="view" aria-hidden="true">View</span>
+          </a>
+          <figcaption>
+            <span class="place" id="place-10"><span class="city">Harvard,</span> <span class="country">Cambridge</span></span>
+            <span class="data"><span class="coord">42.37° N, 71.12° W</span><span class="no" aria-hidden="true">10</span></span>
+          </figcaption>
+        </figure>
+      </li>
+      <li id="photo-11" tabindex="-1">
+        <figure class="shot">
+          <a class="frame" aria-describedby="place-11" href="assets/travels/11-mit.jpg" data-w="1280" data-h="1280">
+            <img src="assets/travels/11-mit-640.jpg" srcset="assets/travels/11-mit-640.jpg 640w, assets/travels/11-mit-960.jpg 960w, assets/travels/11-mit.jpg 1280w"
+                 sizes="(min-width: 960px) min(36vw, 520px), (min-width: 720px) 56vw, min(75vw, calc(100vw - 32px))"
+                 width="640" height="640" loading="lazy" decoding="async"
+                 alt="A domed neoclassical building with tall columns behind a clipped hedge and a wide lawn, under a blue sky">
+            <span class="vh">, open full size</span><span class="view" aria-hidden="true">View</span>
+          </a>
+          <figcaption>
+            <span class="place" id="place-11"><span class="city">MIT,</span> <span class="country">Cambridge</span></span>
+            <span class="data"><span class="coord">42.36° N, 71.09° W</span><span class="no" aria-hidden="true">11</span></span>
+          </figcaption>
+        </figure>
+      </li>
+      <li id="photo-12" tabindex="-1">
+        <figure class="shot">
+          <a class="frame" aria-describedby="place-12" href="assets/travels/12-boston.jpg" data-w="1280" data-h="1280">
+            <img src="assets/travels/12-boston-640.jpg" srcset="assets/travels/12-boston-640.jpg 640w, assets/travels/12-boston-960.jpg 960w, assets/travels/12-boston.jpg 1280w"
+                 sizes="(min-width: 960px) min(36vw, 520px), (min-width: 720px) 56vw, min(75vw, calc(100vw - 32px))"
+                 width="640" height="640" loading="lazy" decoding="async"
+                 alt="A city skyline across a river, framed by trees, a car on the riverside road in the foreground">
+            <span class="vh">, open full size</span><span class="view" aria-hidden="true">View</span>
+          </a>
+          <figcaption>
+            <span class="place" id="place-12"><span class="city">Boston,</span> <span class="country">USA</span></span>
+            <span class="data"><span class="coord">42.36° N, 71.06° W</span><span class="no" aria-hidden="true">12</span></span>
           </figcaption>
         </figure>
       </li>
@@ -512,7 +702,7 @@ if (!window.matchMedia || window.matchMedia('(min-height: 540px), (min-width: 72
 <dialog class="viewer" id="viewer" aria-labelledby="v-title">
   <h2 class="vh" id="v-title">Photo viewer</h2>
   <div class="v-bar">
-    <p class="v-count" aria-hidden="true"><b id="v-n">1</b> / <span id="v-total">9</span></p>
+    <p class="v-count" aria-hidden="true"><b id="v-n">1</b> / <span id="v-total">12</span></p>
     <button type="button" class="v-btn v-close" id="v-close" aria-label="Close viewer">
       <svg viewBox="0 0 18 18" aria-hidden="true" focusable="false"><path d="M3.5 3.5l11 11M14.5 3.5l-11 11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
     </button>
@@ -687,21 +877,31 @@ if (!window.matchMedia || window.matchMedia('(min-height: 540px), (min-width: 72
 </script>
 <script src="https://cdn.jsdelivr.net/npm/d3-array@3.2.4/dist/d3-array.min.js" integrity="sha384-VpKMdU+TlpggHFip46tJ/xkFUs8NFBwLqUMo3+3uiu411lU6eUQYsHVU+JFpA5ja" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/d3-geo@3.1.1/dist/d3-geo.min.js" integrity="sha384-VNiKRUXp0MmglFfqDwkfuk+Y78C3WTJShdKSaFwOacLR3UmamxHIJLBTD3BadIXD" crossorigin="anonymous"></script>
-<script src="assets/globe-data.js"></script>
+<script src="assets/globe-data.js?v=4"></script>
 <script>
-/* Globe: a flight driven by the scroll position. Progress p runs from 0 (the plane parked in Korea, until the
-   globe has settled under the masthead) to 9; p = k when photo k's centre crosses the middle of the part of the
-   screen the photos scroll in (under the masthead, and under the globe band on phones). Between two photos p is
-   linear in the scroll position, and inside each leg the plane eases out of one city and into the next along
-   the great circle. Korea -> Helsinki gets the longest stretch of scroll; photo 01 waits at the bottom of the
-   screen meanwhile. The globe turns so the plane stays near the centre (the camera trails it a little mid-leg)
-   and its zoom is set per city, wide enough to show the leg in and the leg out: the whole globe for Korea ->
-   Helsinki, then only ever closer for the short European legs (on a log scale, so it never jumps, and never so
-   close that the simplified coastlines turn into long straight strokes). Zoomed in, the map fades into the
-   night towards the panel's edges. With reduced motion the view stays on one city and cuts to the next halfway
-   along each leg; only the plane and its trail move. The canvas is redrawn only when the scroll position or
-   the layout changes (one redraw per animation frame at most); nothing runs at rest. Without d3 or the outline
-   data, or on a screen too short for it, the page keeps the plain photo grid. */
+/* Globe: a flight driven by the scroll position, in the order the places were visited: Korea, the nine
+   European photos, then straight on to Boston, where the plane stays for photos 10-12 (one stop for several
+   photos), then home to Korea. First the boarding pass: it holds still in the photo column while the visitor's
+   first scroll tears it (the stub swings open along the perforation and drifts off, the main part lifts away;
+   with reduced motion the main part only fades); scrolling back mends it. Progress p runs from 0 (the plane
+   parked in Korea, until the pass is torn and the globe has settled under the masthead) to N, the number of
+   legs; p = k when the first photo of stop k has its centre at the middle of the part of the screen the photos
+   scroll in (under the masthead, and under the globe band on phones), and stays k until the stop's last photo
+   is there; p = N (home) when the end of the empty stretch after the last photo reaches the bottom of the
+   screen, just before the footer. Between two anchors p is linear in the scroll position, and inside each leg
+   the plane eases out of one city and into the next along the great circle. The long legs, Korea -> Les
+   Houches, Helsinki -> Boston and Boston -> Korea, get the longest stretches of scroll; the photo that ends
+   either of the first two waits at the bottom of the screen during it. The globe turns so the plane stays near the centre (the camera trails it a
+   little mid-leg) and its zoom is set per city, wide enough to show the leg in and the leg out: the whole globe
+   for the long legs, closer for the short European ones (on a log scale, so it never jumps, closing in only
+   until the closest city and opening out only after it, within each stretch between long legs, and never so
+   close that the simplified coastlines turn into long straight strokes). A stop with several photos holds a
+   regional view instead; the long leg into it shows the whole globe and closes in on it near the end. Zoomed
+   in, the map fades into the night towards the panel's edges. The label on the globe names the place with the
+   number of the photo in view. With reduced motion the view stays on one city and cuts to the next halfway
+   along each leg; only the plane and its trail move. The canvas is redrawn only when the scroll position or the
+   layout changes (one redraw per animation frame at most); nothing runs at rest. Without d3 or the outline
+   data, or on a screen too short for it, the page keeps the plain photo grid with the pass, whole, above it. */
 (function () {
   'use strict';
   var root = document.documentElement;
@@ -730,40 +930,74 @@ if (!window.matchMedia || window.matchMedia('(min-height: 540px), (min-width: 72
   probe.style.cssText = 'position:fixed;left:0;top:0;width:1px;height:var(--vh100);visibility:hidden;pointer-events:none';
   document.body.appendChild(probe);
 
-  // ---------- route: Korea, then the photos in page order ----------
-  var stops = [], places = [], items = [], shots = [];
+  // ---------- route: Korea, the photos' places in travel order (= page order), then home to Korea ----------
+  // Labels: Korea (no photo) only with its name; a stop with one photo with that photo's number and caption; a
+  // stop with several photos (photos: [...]) with the number of the photo in view and the stop's own place name.
+  // labels[0] is Korea, labels[j] photo j (shots[j - 1]), and the last label Korea again (home, no photo); stop
+  // k's photos are labels[firstOf[k]..lastOf[k]].
+  var stops = [], names = [], labels = [], shots = [], firstOf = [], lastOf = [], home = false;
   G.stops.forEach(function (s) {
-    if (s.n === 0) {
-      stops.push([s.lon, s.lat]);
-      places.push({ n: '', city: s.place, country: '' });
+    if (home) return;
+    var ids = s.photos || (s.photo != null ? [s.photo] : []);
+    if (!ids.length) {
+      if (stops.length && !s.home) return;         // Korea: at the start, and home again at the end
+      home = stops.length > 0;
+      firstOf.push(labels.length); lastOf.push(labels.length);
+      labels.push({ n: '', city: s.place, country: '', li: null, k: stops.length });
+      stops.push([s.lon, s.lat]); names.push(s.place);
       return;
     }
-    var li = document.getElementById('photo-' + s.n);
-    if (!li || stops.length !== s.n) return;
-    stops.push([s.lon, s.lat]);
-    items.push(li);
-    shots.push(li.querySelector('.shot'));
-    places.push({
-      n: (s.n < 10 ? '0' : '') + s.n,
-      city: li.querySelector('.city').textContent,
-      country: li.querySelector('.country').textContent
+    var lis = ids.map(function (id) { return document.getElementById('photo-' + id); }).filter(Boolean);
+    if (!lis.length || !stops.length) return;
+    var k = stops.length, cut = s.place.lastIndexOf(', ');
+    stops.push([s.lon, s.lat]); names.push(s.place);
+    firstOf.push(labels.length);
+    lis.forEach(function (li) {
+      shots.push(li.querySelector('.shot'));
+      var own = lis.length > 1 && cut > 0;         // several photos: the stop's name ("Boston, USA")
+      labels.push({
+        n: li.querySelector('.no').textContent,
+        city: own ? s.place.slice(0, cut + 1) : li.querySelector('.city').textContent,
+        country: own ? s.place.slice(cut + 2) : li.querySelector('.country').textContent,
+        li: li, k: k
+      });
     });
+    lastOf.push(labels.length - 1);
   });
   var N = stops.length - 1;
-  if (N < 1) { plain(); return; }
+  if (N < 1 || !shots.length) { plain(); return; }
 
-  document.getElementById('globe-route').textContent = 'Route: ' + places[0].city + ', then ' +
-    places.slice(1).map(function (p) { return p.city + ' ' + p.country; }).join('; ') + '.';
+  document.getElementById('globe-route').textContent = 'Route: ' + names[0] + ', then ' +
+    names.slice(1).join('; ') + '.';
 
+  // the boarding pass, torn by the first scroll
+  var boarding = document.getElementById('boarding');
+  var pass = boarding && boarding.querySelector('.pass');
+  var bpMain = pass && pass.querySelector('.bp-main'), bpStub = pass && pass.querySelector('.bp-stub');
+  if (!bpMain || !bpStub) pass = null;
+
+  var LONG = 0.5;          // a leg longer than this (radians, about 3,200 km) is a long flight
+  var STAY_VIEW = 16 * DEG; // the regional view of a stop with several photos and no short leg
   var legs = [];
   for (var k = 1; k <= N; k++) {
-    legs.push({ f: d3.geoInterpolate(stops[k - 1], stops[k]), d: d3.geoDistance(stops[k - 1], stops[k]) });
+    var dk = d3.geoDistance(stops[k - 1], stops[k]);
+    legs.push({ f: d3.geoInterpolate(stops[k - 1], stops[k]), d: dk, long: dk > LONG });
   }
-  // the angle of globe in view at each city: enough for the leg in and the leg out (whole globe at most)
+  // the angle of globe in view at each city: enough for the leg in and the leg out (whole globe at most); a stop
+  // with several photos leaves its long legs out (the camera opens out for them mid-flight instead)
   var viewAt = stops.map(function (_, i) {
-    var din = i > 0 ? legs[i - 1].d : 0, dout = i < N ? legs[i].d : 0;
-    return Math.min(PI, Math.max(3.2 * DEG, 2.5 * Math.max(din, dout)));
+    var stay = lastOf[i] > firstOf[i], v = 0;
+    if (i > 0 && !(stay && legs[i - 1].long)) v = legs[i - 1].d;
+    if (i < N && !(stay && legs[i].long)) v = Math.max(v, legs[i].d);
+    return v ? Math.min(PI, Math.max(3.2 * DEG, 2.5 * v)) : stay ? STAY_VIEW : PI;
   });
+  // the photos that end a long flight wait at the bottom of the screen during it (see the CSS)
+  var waits = [];
+  for (k = 1; k <= N; k++) {
+    if (!legs[k - 1].long || !labels[firstOf[k]].li) continue;   // not the flight home: no photo ends it
+    labels[firstOf[k]].li.classList.add('is-far');
+    waits.push(firstOf[k]);
+  }
 
   // ---------- colours: the page's tokens ----------
   var cs = getComputedStyle(root);
@@ -815,13 +1049,14 @@ if (!window.matchMedia || window.matchMedia('(min-height: 540px), (min-width: 72
 
   // ---------- layout ----------
   var dpr = 1, cw = 0, ch = 0, vis = 0, pmin = 1, stickTop = -1, band = false, VH = 0, parkY = 0;
-  var anchors = [], logS = [], tagSize = [], creditBox = null;
-  var active = false, needMeasure = true, dirty = true, raf = 0, lastP = -1, lastVis = -1;
+  var anchors = [], logS = [], cruise = [], tagSize = [], creditBox = null;
+  var active = false, needMeasure = true, dirty = true, raf = 0, lastP = -1, lastVis = -1, lastLab = -1;
   var target = -1, tagW = 0, tagH = 0, rank = null, curSide = '';
+  var tearStart = 0, tearEnd = 1, tearRise = 70, tearWide = false, lastU = -1, lastCalm = null;
 
   function scaleFor(view) { return FIT * (pmin / 2) / Math.sin(Math.min(view, PI) / 2); }
   function fillTag(i) {
-    var pl = places[i];
+    var pl = labels[i];
     tagN.textContent = pl.n;
     tagCity.textContent = pl.city;
     tagCountry.textContent = pl.country;
@@ -845,40 +1080,82 @@ if (!window.matchMedia || window.matchMedia('(min-height: 540px), (min-width: 72
       canvas.height = Math.round(h * dpr);
     }
     pmin = Math.max(1, Math.min(cw, ch));
-    // zoom per city, capped, and never backing out again once it has started closing in
-    var prev = -Infinity;
-    logS = viewAt.map(function (v) { prev = Math.max(prev, Math.log(Math.min(S_MAX, scaleFor(v)))); return prev; });
+    // zoom per city, capped; closing in only until the closest city and opening out only after it, so the
+    // short European legs in between never back out and in again (each stretch between long legs on its own)
+    var raw = viewAt.map(function (v) { return Math.log(Math.min(S_MAX, scaleFor(v))); });
+    var fwd = [], hi = -Infinity, i;
+    for (i = 0; i <= N; i++) { hi = i > 0 && legs[i - 1].long ? raw[i] : Math.max(hi, raw[i]); fwd[i] = hi; }
+    hi = -Infinity;
+    for (i = N; i >= 0; i--) { hi = i < N && legs[i].long ? raw[i] : Math.max(hi, raw[i]); logS[i] = Math.min(fwd[i], hi); }
+    // the zoom a long leg cruises at: enough to show the whole leg (the whole globe for these)
+    legs.forEach(function (lg, li) {
+      cruise[li] = Math.min(logS[li], logS[li + 1], Math.log(Math.min(S_MAX, scaleFor(Math.min(PI, 2.5 * lg.d)))));
+    });
 
     // the label's size for each place (read here, not while drawing), and the credit's corner, which it avoids
-    for (var i = 0; i <= N; i++) { fillTag(i); tagSize[i] = [tag.offsetWidth, tag.offsetHeight]; }
+    for (i = 0; i < labels.length; i++) { fillTag(i); tagSize[i] = [tag.offsetWidth, tag.offsetHeight]; }
     if (target >= 0) { fillTag(target); tagW = tagSize[target][0]; tagH = tagSize[target][1]; }
     var cr = credit.getBoundingClientRect();
     creditBox = cr.width ? [cr.left - r.left - 4, cr.top - r.top - 4, cr.right - r.left + 4, cr.bottom - r.top + 4] : null;
 
-    // scroll anchors: p = 0 until the globe has settled under the masthead, p = k when photo k's centre is at
-    // the middle of the screen area the photos scroll in (photo 01 measured where it sits, not where it waits)
+    // the boarding pass holds still centred in the screen area the photos scroll in (on phones a little clear
+    // of the band, and whole above the bottom edge on short screens) until the end of its room. It tears only
+    // while it holds still: on phones the first scroll brings it up into place, the next tears it
     var y = window.pageYOffset;
-    shots[0].style.position = 'static';
-    var rects = shots.map(function (el) { return el.getBoundingClientRect(); });
-    var jTop = journey.getBoundingClientRect().top + y;
-    shots[0].style.position = '';
-    var peek = Math.max(56, Math.min(120, VH * 0.12));
-    shots[0].style.setProperty('--hold', (peek - rects[0].height).toFixed(1) + 'px');
-    parkY = Math.max(0, jTop - stickTop);
     var top = stickTop + (band ? box.offsetHeight : 0);
+    if (pass) {
+      tearWide = bpStub.offsetTop < bpMain.offsetHeight / 2;   // the stub beside the main part, not under it
+      // how far the torn stub's lowest corner ends up below the pass (see tearPass): it stays on screen
+      var drop = tearWide ? 24 + 0.17 * bpStub.offsetWidth : 12 + 0.091 * bpStub.offsetWidth;
+      var ph = pass.offsetHeight, free = VH - top - ph;
+      var pt = top + Math.max(band ? 16 : 12, Math.min(Math.max(band ? 40 : 20, free / 2), free - drop - 8));
+      var room = parseFloat(getComputedStyle(pass).marginBottom) || 0;
+      var br = boarding.getBoundingClientRect();
+      boarding.style.setProperty('--pass-top', pt.toFixed(1) + 'px');
+      tearEnd = Math.max(1, br.bottom + y - room - ph - pt);
+      tearStart = Math.max(0, Math.min(tearEnd - 1, br.top + y - pt));   // where it reaches its place
+      // how far the main part rises as it leaves: on short phones not far over the globe band
+      tearRise = Math.min(tearWide ? 80 : 70, Math.max(40, pt - top + 8));
+      lastU = -1;
+    }
+
+    // scroll anchors, one per label: anchors[0] (take-off): p = 0 until the pass is torn and the globe has settled
+    // under the masthead; anchors[j]: photo j's centre is at the middle of the screen area the photos scroll in
+    // (a waiting photo measured where it sits, not where it waits); home: the end of the journey (the empty
+    // stretch after the last photo) reaches the bottom of the screen. See progress()
+    var waitShots = waits.map(function (j) { return shots[j - 1]; });
+    waitShots.forEach(function (el) { el.style.position = 'static'; });
+    var rects = shots.map(function (el) { return el.getBoundingClientRect(); });
+    var jr = journey.getBoundingClientRect();
+    waitShots.forEach(function (el) { el.style.position = ''; });
+    var peek = Math.max(56, Math.min(120, VH * 0.12));
+    waits.forEach(function (j) { shots[j - 1].style.setProperty('--hold', (peek - rects[j - 1].height).toFixed(1) + 'px'); });
+    parkY = Math.max(0, jr.top + y - stickTop);
     var mid = (top + VH) / 2;
-    anchors = [parkY];
+    // the plane takes off once the stub has come free; the pass keeps fading beside the globe during that flight
+    anchors = [Math.max(parkY, pass ? tearStart + 0.28 * (tearEnd - tearStart) : 0)];
     rects.forEach(function (b, j) { anchors.push(Math.max(b.top + y + b.height / 2 - mid, anchors[j] + 1)); });
+    if (home) anchors.push(Math.max(jr.bottom + y - VH, anchors[anchors.length - 1] + 1));
     rank = null;
     dirty = true;
   }
 
+  // p: the leg to stop k runs from the previous stop's last photo to stop k's first; the plane then stays at k
+  // until its last photo
   function progress(y) {
     if (y <= anchors[0]) return 0;
-    for (var i = 1; i <= N; i++) {
-      if (y < anchors[i]) return i - 1 + (y - anchors[i - 1]) / (anchors[i] - anchors[i - 1]);
+    for (var k = 1; k <= N; k++) {
+      var a = anchors[lastOf[k - 1]], b = anchors[firstOf[k]];
+      if (y < b) return k - 1 + (y - a) / (b - a);
+      if (y < anchors[lastOf[k]]) return k;
     }
     return N;
+  }
+  // the label shown: the stop nearest the plane, with (at a stop with several photos) the photo nearest the middle
+  function labelAt(p, y) {
+    var k = Math.round(p), j = firstOf[k];
+    while (j < lastOf[k] && y > (anchors[j] + anchors[j + 1]) / 2) j++;
+    return j;
   }
   // how much of the panel is on screen: all of it once it has settled, less while it is still rising into place
   function visibleH(y) {
@@ -889,6 +1166,44 @@ if (!window.matchMedia || window.matchMedia('(min-height: 540px), (min-width: 72
   // ---------- helpers ----------
   function ease(t) { return 0.5 - 0.5 * Math.cos(PI * t); }
   function smooth(t) { t = Math.max(0, Math.min(1, t)); return t * t * (3 - 2 * t); }
+  function soft(t) { t = Math.max(0, Math.min(1, t)); return t * t * t * (t * (6 * t - 15) + 10); }
+  function fx(v) { return v.toFixed(2); }
+
+  // ---------- the boarding pass tears (u = 0 whole, 1 torn) ----------
+  // the stub swings open on the far end of the perforation (the bottom when it sits beside the main part, the
+  // left end when it sits under it) and comes free in the first part of the scroll; then, while the plane flies
+  // Korea -> Les Houches, the main part, a keepsake rather than something thrown away, drifts up only a little
+  // and fades out slowly (with reduced motion it only fades, nothing moves)
+  function tearPass(y) {
+    var u = Math.max(0, Math.min(1, (y - tearStart) / (tearEnd - tearStart))), calm = calmMQ.matches;
+    if (Math.abs(u - lastU) < 1e-4 && calm === lastCalm) return;
+    lastU = u; lastCalm = calm;
+    // overlapping phases on a soft curve (smootherstep: zero speed and acceleration at both ends): the tear in the
+    // first ~30 % (before the plane takes off at 28 %), the slow fade over the rest, during the first flight
+    var open = soft(u / 0.22), free = soft((u - 0.08) / 0.24), lift = soft((u - 0.2) / 0.8);
+    var gone = calm ? lift : soft((u - 0.24) / 0.76);
+    if (calm) {
+      bpStub.style.transform = bpMain.style.transform = '';
+    } else if (tearWide) {
+      bpStub.style.transform = u ? 'translate(' + fx(10 * free) + 'px,' + fx(14 * free) + 'px) rotate(' +
+        fx(3 * open + 3.5 * free) + 'deg)' : '';
+      bpMain.style.transform = u ? 'translate(' + fx(-12 * lift) + 'px,' + fx(-0.35 * tearRise * lift) + 'px) rotate(' +
+        fx(-0.8 * lift) + 'deg)' : '';
+    } else {
+      bpStub.style.transform = u ? 'translate(' + fx(6 * free) + 'px,' + fx(9 * free) + 'px) rotate(' +
+        fx(1.8 * open + 2 * free) + 'deg)' : '';
+      bpMain.style.transform = u ? 'translate(' + fx(-5 * lift) + 'px,' + fx(-0.3 * tearRise * lift) + 'px) rotate(' +
+        fx(-0.6 * lift) + 'deg)' : '';
+    }
+    bpMain.style.opacity = u ? (1 - gone).toFixed(3) : '';
+    pass.classList.toggle('is-torn', u >= 1);
+  }
+  function mendPass() {
+    if (!pass) return;
+    bpStub.style.transform = bpMain.style.transform = bpMain.style.opacity = '';
+    pass.classList.remove('is-torn');
+    lastU = -1;
+  }
   function lerpAngle(a, b, t) {
     var d = ((b - a) % (2 * PI) + 3 * PI) % (2 * PI) - PI;
     return a + d * t;
@@ -934,7 +1249,7 @@ if (!window.matchMedia || window.matchMedia('(min-height: 540px), (min-width: 72
     if (!calmMQ.matches && tag.animate) {
       try { tag.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 240, easing: 'ease-out' }); } catch (err) { /* no fade */ }
     }
-    items.forEach(function (li, j) { li.classList.toggle('is-current', j + 1 === i); });
+    labels.forEach(function (pl, j) { if (pl.li) pl.li.classList.toggle('is-current', j === i); });
   }
 
   // where the label goes: beside the city, away from the route lines through it, inside the panel
@@ -1008,7 +1323,7 @@ if (!window.matchMedia || window.matchMedia('(min-height: 540px), (min-width: 72
   }
 
   // ---------- drawing ----------
-  function draw(p) {
+  function draw(p, lab) {
     var L = p >= N ? N : Math.floor(p) + 1;      // leg L flies from stop L-1 to stop L
     var t = Math.min(1, p - (L - 1));
     var leg = legs[L - 1];
@@ -1019,9 +1334,12 @@ if (!window.matchMedia || window.matchMedia('(min-height: 540px), (min-width: 72
       var kc = Math.min(N, Math.round(p));
       cam = stops[kc]; s = Math.exp(logS[kc]);
     } else {
-      var sn = Math.sin(PI * t);
+      var sn = Math.sin(PI * t), za = logS[L - 1], zb = logS[L], zc = cruise[L - 1];
       cam = leg.f(Math.max(0, e - LAG * sn * sn));
-      s = Math.exp(logS[L - 1] + (logS[L] - logS[L - 1]) * e);
+      // a long leg opens out to its cruising view early on and closes in on the next city late, on soft
+      // curves (still at both ends); a short one moves from one city's zoom to the next as the plane goes
+      s = Math.exp(leg.long ? zc + (za - zc) * (1 - soft(t / 0.45)) + (zb - zc) * soft((t - 0.55) / 0.45)
+                            : za + (zb - za) * e);
     }
     var fit = Math.min(cw, vis);
     if (fit < pmin) s *= fit / pmin;              // still rising into place: the whole sphere above the fold
@@ -1188,10 +1506,10 @@ if (!window.matchMedia || window.matchMedia('(min-height: 540px), (min-width: 72
     ctx.lineWidth = 0.9; ctx.strokeStyle = COL.pearl; ctx.stroke(PLANE);
     ctx.restore();
 
-    // the label of the city the plane is at or nearest to: on the best side for the landing view that leaves
-    // the plane, the route between them and the credit clear; once placed it keeps its side for as long as that
-    // stays clear, so it does not hop about; hidden if no side is clear
-    if (tgt !== target) setTarget(tgt);
+    // the label of the city the plane is at or nearest to (lab: its photo in view): on the best side for the
+    // landing view that leaves the plane, the route between them and the credit clear; once placed it keeps its
+    // side for as long as that stays clear, so it does not hop about; hidden if no side is clear
+    if (lab !== target) setTarget(lab);
     var shown = false;
     if (tq) {
       var off = labelOff(), R = size * 0.55 + 3;
@@ -1199,10 +1517,10 @@ if (!window.matchMedia || window.matchMedia('(min-height: 540px), (min-width: 72
       var seg = between(plane, stops[tgt], cam);
       var order = curSide ? [curSide] : [];
       for (var ri = 0; ri < rank.length; ri++) if (rank[ri] !== curSide) order.push(rank[ri]);
-      for (var pass = 0; pass < 2 && !shown; pass++) {
+      for (var round = 0; round < 2 && !shown; round++) {
         for (var oi = 0; oi < order.length; oi++) {
           var raw = tagBox(order[oi], tq[0], tq[1], off);
-          if (pass === 0 && overflow(raw) > 28) continue;   // first try sides that need little or no nudging
+          if (round === 0 && overflow(raw) > 28) continue;   // first try sides that need little or no nudging
           var lx = Math.max(6, Math.min(cw - tagW - 6, raw[0])), ly = Math.max(6, Math.min(vis - tagH - 6, raw[1]));
           if (blocked(lx, ly, pq, R, seg)) continue;
           curSide = order[oi]; shown = true;
@@ -1218,11 +1536,13 @@ if (!window.matchMedia || window.matchMedia('(min-height: 540px), (min-width: 72
     raf = 0;
     if (!active) return;
     if (needMeasure) { needMeasure = false; measure(); }
-    var y = window.pageYOffset, p = progress(y), v = visibleH(y);
-    if (!dirty && Math.abs(p - lastP) < 1e-4 && Math.abs(v - lastVis) < 0.5) return;
+    var y = window.pageYOffset;
+    if (pass) tearPass(y);
+    var p = progress(y), v = visibleH(y), lab = labelAt(p, y);
+    if (!dirty && Math.abs(p - lastP) < 1e-4 && Math.abs(v - lastVis) < 0.5 && lab === lastLab) return;
     dirty = false;
-    lastP = p; lastVis = v; vis = v;
-    draw(p);
+    lastP = p; lastVis = v; lastLab = lab; vis = v;
+    draw(p, lab);
   }
   function schedule() { if (!raf) raf = window.requestAnimationFrame(frame); }
   function remeasure() { needMeasure = true; schedule(); }
@@ -1232,9 +1552,10 @@ if (!window.matchMedia || window.matchMedia('(min-height: 540px), (min-width: 72
     root.classList.toggle('globe-on', active);
     root.classList.toggle('no-globe', !active);
     if (!active) {
-      items.forEach(function (li) { li.classList.remove('is-current'); });
+      labels.forEach(function (pl) { if (pl.li) pl.li.classList.remove('is-current'); });
       target = -1;
       tag.classList.remove('is-on');
+      mendPass();
     }
     dirty = true;
     remeasure();
@@ -1249,22 +1570,26 @@ if (!window.matchMedia || window.matchMedia('(min-height: 540px), (min-width: 72
   window.addEventListener('load', remeasure);
   listen(bandMQ, remeasure);
   listen(fitMQ, setActive);
-  listen(calmMQ, function () { dirty = true; schedule(); });
+  listen(calmMQ, function () { dirty = true; lastU = -1; schedule(); });
   if ('ResizeObserver' in window) {
     var ro = new ResizeObserver(remeasure);
     ro.observe(list); ro.observe(stick); ro.observe(mast);
+    if (pass) ro.observe(pass);
   }
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(remeasure);
 
-  // photo 01 waits at the bottom of the screen during the first flight: reached by keyboard, bring it into place
+  // a photo that waits at the bottom of the screen during a long flight: reached by keyboard, bring it into place
   list.addEventListener('focusin', function (ev) {
-    if (!active || !items[0].contains(ev.target)) return;
+    if (!active) return;
+    var j = -1;
+    waits.forEach(function (w) { if (labels[w].li.contains(ev.target)) j = w; });
+    if (j < 0) return;
     var kb = true;
     try { kb = ev.target.matches(':focus-visible'); } catch (err) { /* old browser: assume keyboard */ }
     if (!kb) return;
     window.setTimeout(function () {
-      var b = shots[0].getBoundingClientRect(), top = stickTop + (band ? box.offsetHeight : 0);
-      if (b.top < top - 1 || b.bottom > VH + 1) window.scrollTo(0, Math.round(anchors[1]));
+      var b = shots[j - 1].getBoundingClientRect(), top = stickTop + (band ? box.offsetHeight : 0);
+      if (b.top < top - 1 || b.bottom > VH + 1) window.scrollTo(0, Math.round(anchors[j]));
     }, 0);
   });
 
